@@ -1,9 +1,10 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { Download, FileText, Table, FileSpreadsheet } from "lucide-react";
 import type { ExportFormat } from "@/types/reports";
 
-const formats: { format: ExportFormat; icon: React.ReactNode; color: string; desc: string }[] = [
+const formats: { format: ExportFormat; icon: ReactNode; color: string; desc: string }[] = [
   { format: "PDF",   icon: <FileText size={16} />,        color: "#ef4444", desc: "Full report with charts" },
   { format: "CSV",   icon: <Table size={16} />,           color: "#22c55e", desc: "Raw data, spreadsheet-ready" },
   { format: "Excel", icon: <FileSpreadsheet size={16} />, color: "#3b82f6", desc: "Multi-sheet workbook" },
