@@ -1,0 +1,150 @@
+import type { MarketData, MarketIndicator, MarketRegime } from "@/types/market";
+
+function getRegime(vix: number): MarketRegime {
+  if (vix < 18) return "Risk-On";
+  if (vix < 25) return "Neutral";
+  if (vix < 35) return "Risk-Off";
+  return "Crisis Mode";
+}
+
+const rawIndicators: MarketIndicator[] = [
+  {
+    id: "vix",
+    name: "CBOE Volatility Index",
+    symbol: "VIX",
+    value: 16.8,
+    displayValue: "16.8",
+    dailyChange: -0.4,
+    dailyChangePct: -2.32,
+    weeklyChange: -1.2,
+    weeklyChangePct: -6.67,
+    status: "Normal",
+    interpretation: "Low volatility regime. Risk appetite elevated across asset classes.",
+    category: "Volatility",
+  },
+  {
+    id: "dxy",
+    name: "US Dollar Index",
+    symbol: "DXY",
+    value: 104.2,
+    displayValue: "104.2",
+    dailyChange: 0.15,
+    dailyChangePct: 0.14,
+    weeklyChange: -0.8,
+    weeklyChangePct: -0.76,
+    status: "Caution",
+    interpretation: "Dollar strength pressuring commodities and emerging market assets.",
+    category: "Currency",
+  },
+  {
+    id: "us10y",
+    name: "US 10-Year Treasury",
+    symbol: "US10Y",
+    value: 4.35,
+    displayValue: "4.35%",
+    dailyChange: 0.02,
+    dailyChangePct: 0.46,
+    weeklyChange: -0.08,
+    weeklyChangePct: -1.81,
+    status: "Caution",
+    interpretation: "Elevated yields signal inflation persistence. Duration risk remains.",
+    category: "Rates",
+  },
+  {
+    id: "sp500",
+    name: "S&P 500",
+    symbol: "SPX",
+    value: 5234,
+    displayValue: "5,234",
+    dailyChange: 18,
+    dailyChangePct: 0.34,
+    weeklyChange: 67,
+    weeklyChangePct: 1.30,
+    status: "Normal",
+    interpretation: "Bull trend intact. Breadth improving. All-time highs within reach.",
+    category: "Equity",
+  },
+  {
+    id: "nasdaq",
+    name: "Nasdaq Composite",
+    symbol: "IXIC",
+    value: 16421,
+    displayValue: "16,421",
+    dailyChange: 42,
+    dailyChangePct: 0.26,
+    weeklyChange: 210,
+    weeklyChangePct: 1.30,
+    status: "Normal",
+    interpretation: "Tech leadership continues. AI-driven momentum sustaining growth premium.",
+    category: "Equity",
+  },
+  {
+    id: "gold",
+    name: "Gold Spot",
+    symbol: "XAU",
+    value: 2348,
+    displayValue: "$2,348",
+    dailyChange: 12,
+    dailyChangePct: 0.51,
+    weeklyChange: -28,
+    weeklyChangePct: -1.18,
+    status: "Normal",
+    interpretation: "Safe-haven demand moderate. Central bank accumulation providing floor.",
+    category: "Metals",
+  },
+  {
+    id: "silver",
+    name: "Silver Spot",
+    symbol: "XAG",
+    value: 27.85,
+    displayValue: "$27.85",
+    dailyChange: 0.35,
+    dailyChangePct: 1.27,
+    weeklyChange: -0.90,
+    weeklyChangePct: -3.13,
+    status: "Normal",
+    interpretation: "Industrial demand supportive. Gold/silver ratio near historical mean.",
+    category: "Metals",
+  },
+  {
+    id: "btc",
+    name: "Bitcoin",
+    symbol: "BTC",
+    value: 67800,
+    displayValue: "$67,800",
+    dailyChange: 1240,
+    dailyChangePct: 1.86,
+    weeklyChange: 3200,
+    weeklyChangePct: 4.96,
+    status: "Normal",
+    interpretation: "Post-halving momentum intact. Institutional flows via ETFs accelerating.",
+    category: "Crypto",
+  },
+  {
+    id: "eth",
+    name: "Ethereum",
+    symbol: "ETH",
+    value: 3600,
+    displayValue: "$3,600",
+    dailyChange: -80,
+    dailyChangePct: -2.17,
+    weeklyChange: 420,
+    weeklyChangePct: 13.21,
+    status: "Normal",
+    interpretation: "Layer-2 ecosystem expanding. ETF approval catalyst driving re-rating.",
+    category: "Crypto",
+  },
+];
+
+const vix       = rawIndicators.find((i) => i.id === "vix")!.value;
+const regime    = getRegime(vix);
+const caution   = rawIndicators.filter((i) => i.status === "Caution").length;
+const danger    = rawIndicators.filter((i) => i.status === "Danger").length;
+const riskScore = Math.round(((caution * 3 + danger * 7) / (rawIndicators.length * 7)) * 100);
+
+export const marketData: MarketData = {
+  regime,
+  riskScore,
+  vix,
+  indicators: rawIndicators,
+};
