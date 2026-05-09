@@ -1,6 +1,8 @@
+import type { AssetCategory } from "@/types/asset";
+export type { AssetCategory } from "@/types/asset";
+
 export type RebalanceAction   = "Buy" | "Hold" | "Reduce" | "Sell";
 export type RebalancePriority = "High" | "Medium" | "Low";
-export type AssetCategory     = "ETF" | "Crypto" | "Metals" | "Stocks";
 
 export interface RebalanceItem {
   ticker:         string;
@@ -18,10 +20,10 @@ export interface RebalanceItem {
 }
 
 export interface RebalanceSummaryData {
-  totalValue:       number;
-  balanceScore:     number;
-  actionsNeeded:    number;
-  totalBuyNeeded:   number;
-  totalReduceNeeded:number;
-  items:            RebalanceItem[];
+  totalValue:        number;
+  balanceScore:      number;
+  actionsNeeded:     number;
+  totalBuyNeeded:    number;
+  totalReduceNeeded: number;
+  items:             RebalanceItem[];
 }

@@ -1,4 +1,12 @@
-import type { DCASummaryData } from "@/types/dca";
+import type { DCASummaryData, DCALevel } from "@/types/dca";
+import { ASSET_MAP } from "@/constants/assets";
+
+type BuyZoneBase = {
+  ticker: string; currentPrice: number;
+  smallBuy: number; normalBuy: number; strongBuy: number;
+  aggressiveBuy: number; crisisBuy: number;
+  activeLevel: DCALevel;
+};
 
 export const dcaData: DCASummaryData = {
   marketDrop:       -12,
@@ -11,25 +19,29 @@ export const dcaData: DCASummaryData = {
   avoidAssets:      ["TSLA", "ETH"],
 
   scenarios: [
-    { drop: -5,  level: "Small Buy",      cashDeployPercent: 20, cashDeployAmount: 2000,  triggered: true,  current: false },
-    { drop: -10, level: "Normal Buy",     cashDeployPercent: 40, cashDeployAmount: 4000,  triggered: true,  current: true  },
-    { drop: -20, level: "Strong Buy",     cashDeployPercent: 60, cashDeployAmount: 6000,  triggered: false, current: false },
-    { drop: -35, level: "Aggressive Buy", cashDeployPercent: 80, cashDeployAmount: 8000,  triggered: false, current: false },
-    { drop: -50, level: "Crisis Buy",     cashDeployPercent: 100,cashDeployAmount: 10000, triggered: false, current: false },
+    { drop: -5,  level: "Small Buy",      cashDeployPercent: 20,  cashDeployAmount: 2000,  triggered: true,  current: false },
+    { drop: -10, level: "Normal Buy",     cashDeployPercent: 40,  cashDeployAmount: 4000,  triggered: true,  current: true  },
+    { drop: -20, level: "Strong Buy",     cashDeployPercent: 60,  cashDeployAmount: 6000,  triggered: false, current: false },
+    { drop: -35, level: "Aggressive Buy", cashDeployPercent: 80,  cashDeployAmount: 8000,  triggered: false, current: false },
+    { drop: -50, level: "Crisis Buy",     cashDeployPercent: 100, cashDeployAmount: 10000, triggered: false, current: false },
   ],
 
-  buyZones: [
-    { ticker: "VOO",   name: "Vanguard S&P 500 ETF",      category: "ETF",    currentPrice: 512,   smallBuy: 553,   normalBuy: 524,  strongBuy: 465,  aggressiveBuy: 378, crisisBuy: 291,  activeLevel: "Normal Buy" },
-    { ticker: "QQQ",   name: "Invesco QQQ Trust",          category: "ETF",    currentPrice: 455,   smallBuy: 491,   normalBuy: 465,  strongBuy: 414,  aggressiveBuy: 336, crisisBuy: 258,  activeLevel: "Normal Buy" },
-    { ticker: "SOXX",  name: "iShares Semiconductor ETF",  category: "ETF",    currentPrice: 230,   smallBuy: 248,   normalBuy: 235,  strongBuy: 209,  aggressiveBuy: 170, crisisBuy: 131,  activeLevel: "Normal Buy" },
-    { ticker: "SMH",   name: "VanEck Semiconductor ETF",   category: "ETF",    currentPrice: 240,   smallBuy: 259,   normalBuy: 245,  strongBuy: 218,  aggressiveBuy: 177, crisisBuy: 136,  activeLevel: "Normal Buy" },
-    { ticker: "GLD",   name: "SPDR Gold Trust",            category: "Metals", currentPrice: 225,   smallBuy: 243,   normalBuy: 230,  strongBuy: 205,  aggressiveBuy: 166, crisisBuy: 128,  activeLevel: "Normal Buy" },
-    { ticker: "SLV",   name: "iShares Silver Trust",       category: "Metals", currentPrice: 29,    smallBuy: 31.3,  normalBuy: 29.7, strongBuy: 26.4, aggressiveBuy: 21.4,crisisBuy: 16.5, activeLevel: "Normal Buy" },
-    { ticker: "BTC",   name: "Bitcoin",                    category: "Crypto", currentPrice: 67800, smallBuy: 73200, normalBuy: 69300,strongBuy: 61600,aggressiveBuy: 50100,crisisBuy:38500, activeLevel: "Normal Buy" },
-    { ticker: "ETH",   name: "Ethereum",                   category: "Crypto", currentPrice: 3600,  smallBuy: 3886,  normalBuy: 3682, strongBuy: 3273, aggressiveBuy: 2659,crisisBuy: 2046, activeLevel: "Normal Buy" },
-    { ticker: "BRK.B", name: "Berkshire Hathaway B",       category: "Stocks", currentPrice: 410,   smallBuy: 443,   normalBuy: 419,  strongBuy: 373,  aggressiveBuy: 303, crisisBuy: 233,  activeLevel: "Normal Buy" },
-    { ticker: "TSLA",  name: "Tesla Inc.",                  category: "Stocks", currentPrice: 175,   smallBuy: 189,   normalBuy: 179,  strongBuy: 159,  aggressiveBuy: 129, crisisBuy: 99,   activeLevel: "Normal Buy" },
-  ],
+  buyZones: ([
+    { ticker: "VOO",   currentPrice: 512,   smallBuy: 553,   normalBuy: 524,   strongBuy: 465,   aggressiveBuy: 378,  crisisBuy: 291,  activeLevel: "Normal Buy" },
+    { ticker: "QQQ",   currentPrice: 455,   smallBuy: 491,   normalBuy: 465,   strongBuy: 414,   aggressiveBuy: 336,  crisisBuy: 258,  activeLevel: "Normal Buy" },
+    { ticker: "SOXX",  currentPrice: 230,   smallBuy: 248,   normalBuy: 235,   strongBuy: 209,   aggressiveBuy: 170,  crisisBuy: 131,  activeLevel: "Normal Buy" },
+    { ticker: "SMH",   currentPrice: 240,   smallBuy: 259,   normalBuy: 245,   strongBuy: 218,   aggressiveBuy: 177,  crisisBuy: 136,  activeLevel: "Normal Buy" },
+    { ticker: "GLD",   currentPrice: 225,   smallBuy: 243,   normalBuy: 230,   strongBuy: 205,   aggressiveBuy: 166,  crisisBuy: 128,  activeLevel: "Normal Buy" },
+    { ticker: "SLV",   currentPrice: 29,    smallBuy: 31.3,  normalBuy: 29.7,  strongBuy: 26.4,  aggressiveBuy: 21.4, crisisBuy: 16.5, activeLevel: "Normal Buy" },
+    { ticker: "BTC",   currentPrice: 67800, smallBuy: 73200, normalBuy: 69300, strongBuy: 61600, aggressiveBuy: 50100,crisisBuy: 38500,activeLevel: "Normal Buy" },
+    { ticker: "ETH",   currentPrice: 3600,  smallBuy: 3886,  normalBuy: 3682,  strongBuy: 3273,  aggressiveBuy: 2659, crisisBuy: 2046, activeLevel: "Normal Buy" },
+    { ticker: "BRK.B", currentPrice: 410,   smallBuy: 443,   normalBuy: 419,   strongBuy: 373,   aggressiveBuy: 303,  crisisBuy: 233,  activeLevel: "Normal Buy" },
+    { ticker: "TSLA",  currentPrice: 175,   smallBuy: 189,   normalBuy: 179,   strongBuy: 159,   aggressiveBuy: 129,  crisisBuy: 99,   activeLevel: "Normal Buy" },
+  ] as BuyZoneBase[]).map((z) => ({
+    ...z,
+    name:     ASSET_MAP[z.ticker].name,
+    category: ASSET_MAP[z.ticker].category,
+  })),
 
   riskFactors: [
     "Market still -12% from ATH — further downside possible before recovery",

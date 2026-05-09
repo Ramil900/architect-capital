@@ -1,11 +1,5 @@
-import type { MarketData, MarketIndicator, MarketRegime } from "@/types/market";
-
-function getRegime(vix: number): MarketRegime {
-  if (vix < 18) return "Risk-On";
-  if (vix < 25) return "Neutral";
-  if (vix < 35) return "Risk-Off";
-  return "Crisis Mode";
-}
+import type { MarketData, MarketIndicator } from "@/types/market";
+import { getMarketRegime } from "@/constants/risk-levels";
 
 const rawIndicators: MarketIndicator[] = [
   {
@@ -137,7 +131,7 @@ const rawIndicators: MarketIndicator[] = [
 ];
 
 const vix       = rawIndicators.find((i) => i.id === "vix")!.value;
-const regime    = getRegime(vix);
+const regime    = getMarketRegime(vix);
 const caution   = rawIndicators.filter((i) => i.status === "Caution").length;
 const danger    = rawIndicators.filter((i) => i.status === "Danger").length;
 const riskScore = Math.round(((caution * 3 + danger * 7) / (rawIndicators.length * 7)) * 100);

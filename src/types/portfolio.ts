@@ -1,5 +1,7 @@
-export type AIAction      = "Buy" | "Hold" | "Reduce" | "Sell";
-export type AssetCategory = "ETF" | "Crypto" | "Metals" | "Stocks";
+export type { AssetCategory } from "@/types/asset";
+export type AIAction = "Buy" | "Hold" | "Reduce" | "Sell";
+
+import type { AssetCategory } from "@/types/asset";
 
 export interface RawPosition {
   id:            string;
@@ -13,19 +15,19 @@ export interface RawPosition {
 }
 
 export interface PortfolioPosition extends RawPosition {
-  positionValue:      number;
-  investedAmount:     number;
-  unrealizedPL:       number;
-  unrealizedPLPercent:number;
-  currentPercent:     number;
-  differencePercent:  number;
-  aiAction:           AIAction;
+  positionValue:       number;
+  investedAmount:      number;
+  unrealizedPL:        number;
+  unrealizedPLPercent: number;
+  currentPercent:      number;
+  differencePercent:   number;
+  aiAction:            AIAction;
 }
 
 export interface PortfolioSummaryData {
-  totalValue:    number;
-  totalInvested: number;
-  totalPL:       number;
-  totalPLPercent:number;
-  positions:     PortfolioPosition[];
+  totalValue:     number;
+  totalInvested:  number;
+  totalPL:        number;
+  totalPLPercent: number;
+  positions:      PortfolioPosition[];
 }
