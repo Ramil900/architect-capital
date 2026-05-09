@@ -27,7 +27,7 @@ export default function AssetAllocationChart() {
 
       <div className="flex gap-4 items-center">
         <div className="w-[140px] h-[140px] shrink-0">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width={140} height={140}>
             <PieChart>
               <Pie
                 data={data}
