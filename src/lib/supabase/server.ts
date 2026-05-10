@@ -7,7 +7,7 @@ import { env } from "@/constants/env";
 // Import only in Server Components, API routes, or server actions.
 export async function createServerClient() {
   const cookieStore = await cookies();
-  return createSSRClient<Database>(env.supabase.url, env.supabase.anonKey, {
+  return createSSRClient<Database>(env.supabaseUrl, env.supabaseAnon, {
     cookies: {
       getAll() {
         return cookieStore.getAll();

@@ -92,7 +92,6 @@ export async function refreshMarketData() {
   if (external.source === "external" && Object.keys(external.prices).length > 0) {
     const errors: string[] = [];
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { createServerClient } = await import("@/lib/supabase/server");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const supabase = await (createServerClient as any)() as any;

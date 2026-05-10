@@ -73,6 +73,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `COINGECKO_API_KEY` | No | CoinGecko API — crypto prices |
 | `BINANCE_API_KEY` | No | Binance API — crypto exchange data |
 | `MARKET_SYNC_SECRET` | No | Secret header for `POST /api/market/sync` |
+| `CRON_SECRET` | No | Secret for `GET /api/cron/market-refresh?secret=...` |
 | `NEXT_PUBLIC_APP_URL` | No | Production URL (e.g. `https://app.example.com`) |
 | `NEXT_PUBLIC_APP_NAME` | No | App display name override |
 
@@ -193,9 +194,17 @@ In **Supabase → Authentication → URL Configuration**, add:
 https://your-app.vercel.app/**
 ```
 
-### Market Sync (optional)
+### Automatic Market Refresh (Vercel Cron)
 
-Trigger a live data sync manually or via a cron service:
+`vercel.json` schedules `/api/cron/market-refresh` every 15 minutes automatically on Vercel Pro/Enterprise. Add `CRON_SECRET` to your environment variables — Vercel passes it via the `Authorization` header.
+
+To trigger manually:
+
+```bash
+curl "https://your-app.vercel.app/api/cron/market-refresh?secret=YOUR_CRON_SECRET"
+```
+
+### Manual Market Sync (optional)
 
 ```bash
 curl -X POST https://your-app.vercel.app/api/market/sync \
@@ -228,8 +237,12 @@ src/
 ├── lib/
 │   ├── supabase/         # Browser + server Supabase clients
 │   ├── market/           # Twelvedata, Finnhub, CoinGecko helpers
+│   ├── pdf/              # jsPDF report generator
+│   ├── export/           # CSV + Excel export generators
+│   ├── api-cache.ts      # In-memory TTL cache for API routes
+│   ├── api-response.ts   # Standard success/error response helpers
+│   ├── rate-limit.ts     # In-memory rate limiter
 │   └── auth/
 ├── types/                # TypeScript interfaces
-├── constants/            # Demo/fallback data
-└── utils/                # Export utilities (PDF, CSV, Excel)
+└── constants/            # Demo/fallback data + env helpers
 ```
