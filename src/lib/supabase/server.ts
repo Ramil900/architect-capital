@@ -1,12 +1,26 @@
-import { createClient } from "@supabase/supabase-js";
+import { createServerClient as createSSRClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import type { Database } from "@/types/supabase";
 import { env } from "@/constants/env";
 
-// Server-only client using the service role key (full DB access, bypasses RLS).
+// Server-only client — reads/writes session via cookies for App Router compatibility.
 // Import only in Server Components, API routes, or server actions.
-export function createServerClient() {
-  const key = env.supabase.serviceRoleKey ?? env.supabase.anonKey;
-  return createClient<Database>(env.supabase.url, key, {
-    auth: { persistSession: false },
+export async function createServerClient() {
+  const cookieStore = await cookies();
+  return createSSRClient<Database>(env.supabase.url, env.supabase.anonKey, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
+        } catch {
+          // Server Component — cookie writes are a no-op, middleware handles refresh.
+        }
+      },
+    },
   });
 }

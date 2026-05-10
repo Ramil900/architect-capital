@@ -2,7 +2,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import type { Session, User } from "@supabase/supabase-js";
 
 export async function getSession(): Promise<Session | null> {
-  const supabase = createServerClient();
+  const supabase = await createServerClient();
   const { data: { session } } = await supabase.auth.getSession();
   return session;
 }

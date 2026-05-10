@@ -1,30 +1,39 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 import { isProtectedRoute, isPublicRoute } from "@/lib/auth/auth-routes";
+import { env } from "@/constants/env";
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // TODO: replace with real Supabase session check once auth is fully wired.
-  // Example future implementation:
-  //   const session = await getSessionFromCookies(request);
-  //   if (isProtectedRoute(pathname) && !session) {
-  //     return NextResponse.redirect(new URL("/login", request.url));
-  //   }
-  //   if (isPublicRoute(pathname) && session) {
-  //     return NextResponse.redirect(new URL("/dashboard", request.url));
-  //   }
+  let response = NextResponse.next({ request });
 
-  // Skeleton: log route type in development only, always pass through.
-  if (process.env.NODE_ENV === "development") {
-    if (isProtectedRoute(pathname)) {
-      console.log(`[middleware] protected route: ${pathname}`);
-    } else if (isPublicRoute(pathname)) {
-      console.log(`[middleware] public route: ${pathname}`);
-    }
+  const supabase = createServerClient(env.supabase.url, env.supabase.anonKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
+
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (isProtectedRoute(pathname) && !session) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  return NextResponse.next();
+  if (isPublicRoute(pathname) && session) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  return response;
 }
 
 export const config = {
