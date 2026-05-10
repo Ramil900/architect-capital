@@ -29,6 +29,7 @@ export interface AIAnalysisData {
   dcaAmount:       number;
   dcaFrequency:    string;
   dcaAllocation:   { ticker: string; percent: number }[];
+  rebalanceSummary?: string;
   finalSummary:    string;
   lastUpdated:     string;
 }
