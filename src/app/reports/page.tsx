@@ -3,13 +3,30 @@
 import { useState, useEffect, useCallback } from "react";
 import { Plus } from "lucide-react";
 import { getReports, createReport, deleteReport } from "@/services/client/reports.client";
-import type { ReportSummaryData } from "@/types/reports";
+import { getPortfolio } from "@/services/client/portfolio.client";
+import { getMarketRegime } from "@/services/client/market.client";
+import { getAIAnalysis } from "@/services/client/ai.client";
+import { getDcaPlan } from "@/services/client/dca.client";
+import { getRebalancePlan } from "@/services/client/rebalance.client";
+import { portfolioData as demoPortfolio } from "@/constants/demo-portfolio";
+import { marketData as demoMarket } from "@/constants/demo-market";
+import { aiAnalysis as demoAI } from "@/constants/demo-ai";
+import { dcaData as demoDca } from "@/constants/dcaData";
+import { rebalancingData as demoRebalance } from "@/constants/rebalancingData";
 import { PageLoading, PageError } from "@/components/ui/PageStates";
-import ReportSummaryCard   from "@/components/reports/ReportSummaryCard";
-import ReportTypeGrid      from "@/components/reports/ReportTypeGrid";
-import AIReportSummary     from "@/components/reports/AIReportSummary";
-import ReportHistoryTable  from "@/components/reports/ReportHistoryTable";
-import ExportCenter        from "@/components/reports/ExportCenter";
+import ReportSummaryCard  from "@/components/reports/ReportSummaryCard";
+import ReportTypeGrid     from "@/components/reports/ReportTypeGrid";
+import AIReportSummary    from "@/components/reports/AIReportSummary";
+import ReportHistoryTable from "@/components/reports/ReportHistoryTable";
+import ExportCenter       from "@/components/reports/ExportCenter";
+import type { ReportSummaryData } from "@/types/reports";
+import type { PortfolioSummaryData } from "@/types/portfolio";
+import type { MarketRegime } from "@/types/market";
+import type { AIAnalysisData } from "@/types/ai";
+import type { DCASummaryData } from "@/types/dca";
+import type { RebalanceSummaryData } from "@/types/rebalancing";
+
+interface RegimeData { regime: MarketRegime; vix: number; riskScore: number }
 
 export default function ReportsPage() {
   const [data,       setData]       = useState<ReportSummaryData | null>(null);
@@ -19,14 +36,32 @@ export default function ReportsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [actionErr,  setActionErr]  = useState<string | null>(null);
 
+  const [portfolio,  setPortfolio]  = useState<PortfolioSummaryData>(demoPortfolio);
+  const [regime,     setRegime]     = useState<RegimeData>({ regime: demoMarket.regime, vix: demoMarket.vix, riskScore: demoMarket.riskScore });
+  const [ai,         setAI]         = useState<AIAnalysisData>(demoAI);
+  const [dca,        setDca]        = useState<DCASummaryData>(demoDca);
+  const [rebalance,  setRebalance]  = useState<RebalanceSummaryData>(demoRebalance);
+
   const load = useCallback(async (showSpinner = true) => {
     if (showSpinner) setLoading(true);
     try {
-      const d = await getReports();
-      setData(d);
-      setError(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load reports");
+      const [reportsRes, portfolioRes, regimeRes, aiRes, dcaRes, rebalanceRes] = await Promise.allSettled([
+        getReports(),
+        getPortfolio(),
+        getMarketRegime(),
+        getAIAnalysis(),
+        getDcaPlan(),
+        getRebalancePlan(),
+      ]);
+
+      if (reportsRes.status === "fulfilled") { setData(reportsRes.value); setError(null); }
+      else setError(reportsRes.reason instanceof Error ? reportsRes.reason.message : "Failed to load reports");
+
+      if (portfolioRes.status  === "fulfilled") setPortfolio(portfolioRes.value);
+      if (regimeRes.status     === "fulfilled") setRegime(regimeRes.value);
+      if (aiRes.status         === "fulfilled") setAI(aiRes.value);
+      if (dcaRes.status        === "fulfilled") setDca(dcaRes.value);
+      if (rebalanceRes.status  === "fulfilled") setRebalance(rebalanceRes.value);
     } finally {
       setLoading(false);
     }
@@ -39,10 +74,19 @@ export default function ReportsPage() {
     setGenerating(true);
     setActionErr(null);
     try {
+      const highPriority = rebalance.items.filter((i) => i.priority === "High").length;
+      const description = [
+        `Portfolio $${Math.round(portfolio.totalValue).toLocaleString()} | P/L ${portfolio.totalPLPercent >= 0 ? "+" : ""}${portfolio.totalPLPercent.toFixed(2)}%`,
+        `Market: ${regime.regime} | VIX ${regime.vix} | Risk ${regime.riskScore}/100`,
+        `AI: ${ai.portfolioRisk} risk | DCA ${ai.dcaStatus}`,
+        `Rebalance: ${highPriority} high-priority action${highPriority !== 1 ? "s" : ""}`,
+        `DCA: ${dca.dcaStatus} | Drop ${dca.marketDrop}%`,
+      ].join(" · ");
+
       await createReport({
         type:        "Daily",
-        title:       "Daily Portfolio Report",
-        description: "End-of-day summary: positions, P/L, AI signals, and market regime.",
+        title:       `Daily Portfolio Report — ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
+        description,
         status:      "Generated",
       });
       await load(false);
