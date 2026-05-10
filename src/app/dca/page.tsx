@@ -20,7 +20,8 @@ export default function DcaPage() {
   const [saved,   setSaved]   = useState(false);
   const [saveErr, setSaveErr] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (showSpinner = true) => {
+    if (showSpinner) setLoading(true);
     try {
       const d = await getDcaPlan();
       setData(d);
@@ -57,6 +58,7 @@ export default function DcaPage() {
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+      load(false);
     } catch (e) {
       setSaveErr(e instanceof Error ? e.message : "Failed to record action");
     } finally {
