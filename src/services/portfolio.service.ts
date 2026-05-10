@@ -14,6 +14,6 @@ export function getPortfolioAllocation(): { ticker: string; percent: number; col
   return positions.map((p) => ({
     ticker:  p.ticker,
     percent: Math.round((p.positionValue / totalValue) * 1000) / 10,
-    color:   "", // color comes from ASSETS — callers can join if needed
+    color:   "",
   }));
 }

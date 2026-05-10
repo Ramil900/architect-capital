@@ -23,9 +23,10 @@ interface Props {
   position: PortfolioPosition;
   onEdit:   (position: PortfolioPosition) => void;
   onDelete: (id: string) => void;
+  deleting?: boolean;
 }
 
-export default function PortfolioRow({ position: p, onEdit, onDelete }: Props) {
+export default function PortfolioRow({ position: p, onEdit, onDelete, deleting }: Props) {
   const plPos   = p.unrealizedPL >= 0;
   const diffPos = p.differencePercent >= 0;
 
@@ -81,7 +82,7 @@ export default function PortfolioRow({ position: p, onEdit, onDelete }: Props) {
           <button onClick={() => onEdit(p)} className="p-1 rounded" style={{ color: "var(--text-muted)" }}>
             <Pencil size={13} />
           </button>
-          <button onClick={() => onDelete(p.id)} className="p-1 rounded" style={{ color: "var(--text-muted)" }}>
+          <button onClick={() => onDelete(p.id)} disabled={deleting} className="p-1 rounded disabled:opacity-40" style={{ color: "var(--text-muted)" }}>
             <Trash2 size={13} />
           </button>
         </div>

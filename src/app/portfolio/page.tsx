@@ -1,25 +1,33 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getPortfolio } from "@/services/client/portfolio.client";
 import type { PortfolioSummaryData } from "@/types/portfolio";
 import { PageLoading, PageError } from "@/components/ui/PageStates";
-import PortfolioSummary from "@/components/portfolio/PortfolioSummary";
-import PortfolioTable from "@/components/portfolio/PortfolioTable";
-import AllocationStatus from "@/components/portfolio/AllocationStatus";
+import PortfolioSummary      from "@/components/portfolio/PortfolioSummary";
+import PortfolioTable        from "@/components/portfolio/PortfolioTable";
+import AllocationStatus      from "@/components/portfolio/AllocationStatus";
 import PortfolioAnalyticsCard from "@/components/portfolio/PortfolioAnalyticsCard";
 
 export default function PortfolioPage() {
-  const [data, setData]       = useState<PortfolioSummaryData | null>(null);
+  const [data,    setData]    = useState<PortfolioSummaryData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState<string | null>(null);
+  const [error,   setError]   = useState<string | null>(null);
 
-  useEffect(() => {
-    getPortfolio()
-      .then(setData)
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setLoading(false));
+  const load = useCallback(async (showSpinner = true) => {
+    if (showSpinner) setLoading(true);
+    try {
+      const d = await getPortfolio();
+      setData(d);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load portfolio");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   if (loading) return <PageLoading />;
   if (error)   return <PageError message={error} />;
@@ -36,7 +44,7 @@ export default function PortfolioPage() {
         <PortfolioAnalyticsCard data={data} />
       </div>
 
-      <PortfolioTable data={data} />
+      <PortfolioTable data={data} onRefetch={() => load(false)} />
     </div>
   );
 }
