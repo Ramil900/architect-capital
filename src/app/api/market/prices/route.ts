@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { getMarketIndicators } from "@/services/market.server";
+import { getMarketPrices } from "@/services/market.server";
 
 export async function GET() {
   try {
-    const data = await getMarketIndicators();
+    const data = await getMarketPrices();
     return NextResponse.json({ success: true, data, error: null });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

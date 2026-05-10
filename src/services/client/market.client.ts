@@ -9,6 +9,10 @@ export function getMarketRegime(): Promise<{ regime: MarketRegime; vix: number; 
   return apiGet<{ regime: MarketRegime; vix: number; riskScore: number }>("/api/market/regime");
 }
 
+export function getMarketPrices(): Promise<Record<string, number>> {
+  return apiGet<Record<string, number>>("/api/market/prices");
+}
+
 export function getMarketData(): Promise<MarketData> {
   return Promise.all([
     apiGet<MarketIndicator[]>("/api/market/indicators"),

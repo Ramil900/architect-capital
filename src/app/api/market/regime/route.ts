@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { getMarketData } from "@/services/market.service";
+import { getMarketRegime } from "@/services/market.server";
 
-export function GET() {
+export async function GET() {
   try {
-    const { regime, vix, riskScore } = getMarketData();
-    return NextResponse.json({ success: true, data: { regime, vix, riskScore }, error: null });
+    const data = await getMarketRegime();
+    return NextResponse.json({ success: true, data, error: null });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ success: false, data: null, error: message }, { status: 500 });
