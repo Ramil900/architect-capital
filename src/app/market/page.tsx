@@ -1,4 +1,4 @@
-import { marketData } from "@/constants/marketData";
+import { getMarketData } from "@/services/market.service";
 import MarketSummary from "@/components/market/MarketSummary";
 import MarketTrendChart from "@/components/market/MarketTrendChart";
 import RiskScoreCard from "@/components/market/RiskScoreCard";
@@ -6,6 +6,8 @@ import IndicatorGrid from "@/components/market/IndicatorGrid";
 import MarketInterpretation from "@/components/market/MarketInterpretation";
 
 export default function MarketPage() {
+  const marketData = getMarketData();
+
   return (
     <div className="flex flex-col gap-6">
       <MarketSummary data={marketData} />

@@ -1,4 +1,4 @@
-import { dcaData } from "@/constants/dcaData";
+import { getDcaPlan } from "@/services/dca.service";
 import DcaSummaryCard from "@/components/dca/DcaSummaryCard";
 import DcaScenarioCard from "@/components/dca/DcaScenarioCard";
 import DcaBuyZoneTable from "@/components/dca/DcaBuyZoneTable";
@@ -7,6 +7,8 @@ import DcaRiskPanel from "@/components/dca/DcaRiskPanel";
 import DcaRecommendationPanel from "@/components/dca/DcaRecommendationPanel";
 
 export default function DcaPage() {
+  const dcaData = getDcaPlan();
+
   return (
     <div className="flex flex-col gap-6">
       <DcaSummaryCard data={dcaData} />

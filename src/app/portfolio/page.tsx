@@ -1,10 +1,12 @@
-import { portfolioData } from "@/constants/portfolioData";
+import { getPortfolioSummary } from "@/services/portfolio.service";
 import PortfolioSummary from "@/components/portfolio/PortfolioSummary";
 import PortfolioTable from "@/components/portfolio/PortfolioTable";
 import AllocationStatus from "@/components/portfolio/AllocationStatus";
 import PortfolioAnalyticsCard from "@/components/portfolio/PortfolioAnalyticsCard";
 
 export default function PortfolioPage() {
+  const portfolioData = getPortfolioSummary();
+
   return (
     <div className="flex flex-col gap-6">
       <PortfolioSummary data={portfolioData} />

@@ -1,11 +1,11 @@
 import { TrendingUp, TrendingDown, ShieldAlert } from "lucide-react";
-import { portfolioData } from "@/constants/demo-portfolio";
-import { aiAnalysis } from "@/constants/demo-ai";
+import { getPortfolioSummary } from "@/services/portfolio.service";
+import { getDemoAIReport } from "@/services/ai.service";
 
-const DAILY_PL         = 1250;
-const DAILY_PL_PCT     = 0.76;
-const MONTHLY_PL       = 7400;
-const MONTHLY_PL_PCT   = 4.7;
+const DAILY_PL       = 1250;
+const DAILY_PL_PCT   = 0.76;
+const MONTHLY_PL     = 7400;
+const MONTHLY_PL_PCT = 4.7;
 
 function PLBadge({ value, percent }: { value: number; percent: number }) {
   const positive = value >= 0;
@@ -18,8 +18,8 @@ function PLBadge({ value, percent }: { value: number; percent: number }) {
 }
 
 export default function PortfolioSummaryCard() {
-  const totalValue    = portfolioData.totalValue;
-  const portfolioRisk = aiAnalysis.portfolioRisk;
+  const { totalValue }   = getPortfolioSummary();
+  const { portfolioRisk } = getDemoAIReport();
 
   return (
     <div className="rounded-lg p-5 border" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>

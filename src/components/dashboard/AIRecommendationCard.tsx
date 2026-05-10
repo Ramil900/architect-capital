@@ -1,6 +1,6 @@
 import { BrainCircuit } from "lucide-react";
-import { portfolioData } from "@/constants/demo-portfolio";
-import { aiAnalysis } from "@/constants/demo-ai";
+import { getPortfolioPositions } from "@/services/portfolio.service";
+import { getDemoAIReport } from "@/services/ai.service";
 
 const actionColors: Record<string, string> = {
   Buy:    "var(--green)",
@@ -24,9 +24,12 @@ function TagGroup({ label, items, color }: { label: string; items: string[]; col
 }
 
 export default function AIRecommendationCard() {
-  const buy    = portfolioData.positions.filter((p) => p.aiAction === "Buy").map((p) => p.ticker);
-  const hold   = portfolioData.positions.filter((p) => p.aiAction === "Hold").map((p) => p.ticker);
-  const reduce = portfolioData.positions.filter((p) => p.aiAction === "Reduce").map((p) => p.ticker);
+  const positions  = getPortfolioPositions();
+  const { finalSummary, dcaStatus } = getDemoAIReport();
+
+  const buy    = positions.filter((p) => p.aiAction === "Buy").map((p) => p.ticker);
+  const hold   = positions.filter((p) => p.aiAction === "Hold").map((p) => p.ticker);
+  const reduce = positions.filter((p) => p.aiAction === "Reduce").map((p) => p.ticker);
 
   return (
     <div className="rounded-lg p-5 border" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
@@ -38,7 +41,7 @@ export default function AIRecommendationCard() {
       </div>
 
       <p className="text-xs mb-4 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-        {aiAnalysis.finalSummary}
+        {finalSummary}
       </p>
 
       <div className="flex flex-col gap-2">
@@ -49,7 +52,7 @@ export default function AIRecommendationCard() {
 
       <div className="mt-3 pt-3 border-t flex items-center justify-between" style={{ borderColor: "var(--border-subtle)" }}>
         <span className="text-xs" style={{ color: "var(--text-muted)" }}>DCA Status</span>
-        <span className="text-xs font-medium" style={{ color: "var(--yellow)" }}>{aiAnalysis.dcaStatus}</span>
+        <span className="text-xs font-medium" style={{ color: "var(--yellow)" }}>{dcaStatus}</span>
       </div>
     </div>
   );

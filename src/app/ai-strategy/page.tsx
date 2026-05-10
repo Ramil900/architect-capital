@@ -1,4 +1,4 @@
-import { aiAnalysis } from "@/constants/aiData";
+import { getDemoAIReport } from "@/services/ai.service";
 import AISummaryCard from "@/components/ai/AISummaryCard";
 import AIChatWindow from "@/components/ai/AIChatWindow";
 import MarketRegimeAnalysis from "@/components/ai/MarketRegimeAnalysis";
@@ -7,6 +7,8 @@ import AIRecommendationPanel from "@/components/ai/AIRecommendationPanel";
 import DcaStatusCard from "@/components/ai/DcaStatusCard";
 
 export default function AIStrategyPage() {
+  const aiAnalysis = getDemoAIReport();
+
   return (
     <div className="flex flex-col gap-6">
       <AISummaryCard data={aiAnalysis} />

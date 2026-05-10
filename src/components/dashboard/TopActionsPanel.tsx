@@ -1,6 +1,6 @@
 import { ArrowUpCircle, MinusCircle, PauseCircle } from "lucide-react";
 import type { ComponentType } from "react";
-import { aiAnalysis } from "@/constants/demo-ai";
+import { getAIRecommendations } from "@/services/ai.service";
 import type { AIAction } from "@/types/ai";
 
 type IconComponent = ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
@@ -13,7 +13,7 @@ const ACTION_CONFIG: Record<AIAction, { icon: IconComponent; color: string }> = 
 };
 
 export default function TopActionsPanel() {
-  const actions = aiAnalysis.recommendations.map((r) => ({
+  const actions = getAIRecommendations().map((r) => ({
     type:   r.action,
     asset:  r.ticker,
     reason: r.reasoning,

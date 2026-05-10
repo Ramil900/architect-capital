@@ -1,5 +1,5 @@
 import { TrendingUp, TrendingDown } from "lucide-react";
-import { marketData } from "@/constants/demo-market";
+import { getMarketIndicators } from "@/services/market.service";
 
 const OVERVIEW_IDS = ["vix", "dxy", "us10y", "sp500", "nasdaq", "btc", "gold"] as const;
 
@@ -10,7 +10,8 @@ const statusColor: Record<string, string> = {
 };
 
 export default function MarketOverviewGrid() {
-  const indicators = OVERVIEW_IDS.map((id) => marketData.indicators.find((i) => i.id === id)!);
+  const allIndicators = getMarketIndicators();
+  const indicators    = OVERVIEW_IDS.map((id) => allIndicators.find((i) => i.id === id)!);
 
   return (
     <div className="rounded-lg p-5 border" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
@@ -27,9 +28,7 @@ export default function MarketOverviewGrid() {
                 <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>{ind.symbol}</span>
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: statusColor[ind.status] }} />
               </div>
-              <p className="text-sm font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
-                {ind.displayValue}
-              </p>
+              <p className="text-sm font-semibold mb-1" style={{ color: "var(--text-primary)" }}>{ind.displayValue}</p>
               <div className="flex items-center gap-0.5" style={{ color: positive ? "var(--green)" : "var(--red)" }}>
                 {positive ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
                 <span className="text-xs">{positive ? "+" : ""}{ind.dailyChangePct.toFixed(2)}%</span>

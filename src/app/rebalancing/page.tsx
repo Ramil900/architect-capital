@@ -1,4 +1,4 @@
-import { rebalancingData } from "@/constants/rebalancingData";
+import { getRebalanceSummary } from "@/services/rebalance.service";
 import RebalanceSummaryCard from "@/components/rebalancing/RebalanceSummaryCard";
 import CurrentAllocationChart from "@/components/rebalancing/CurrentAllocationChart";
 import TargetAllocationChart from "@/components/rebalancing/TargetAllocationChart";
@@ -7,6 +7,8 @@ import RebalanceActionCard from "@/components/rebalancing/RebalanceActionCard";
 import RebalanceRiskNotes from "@/components/rebalancing/RebalanceRiskNotes";
 
 export default function RebalancingPage() {
+  const rebalancingData = getRebalanceSummary();
+
   return (
     <div className="flex flex-col gap-6">
       <RebalanceSummaryCard data={rebalancingData} />
