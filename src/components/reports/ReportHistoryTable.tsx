@@ -1,3 +1,6 @@
+"use client";
+
+import { Trash2 } from "lucide-react";
 import type { ReportSummaryData, ReportType, ReportStatus } from "@/types/reports";
 
 const typeColor: Record<ReportType, string> = {
@@ -15,10 +18,12 @@ const statusStyle: Record<ReportStatus, { color: string }> = {
 };
 
 interface Props {
-  data: ReportSummaryData;
+  data:        ReportSummaryData;
+  onDelete:    (id: string) => void;
+  deletingId:  string | null;
 }
 
-export default function ReportHistoryTable({ data }: Props) {
+export default function ReportHistoryTable({ data, onDelete, deletingId }: Props) {
   return (
     <div
       className="rounded-lg border overflow-hidden"
@@ -33,9 +38,9 @@ export default function ReportHistoryTable({ data }: Props) {
       <table className="w-full">
         <thead>
           <tr style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-            {["Type", "Title", "Generated", "Size", "Status"].map((col) => (
+            {["Type", "Title", "Generated", "Size", "Status", ""].map((col, i) => (
               <th
-                key={col}
+                key={i}
                 className={`px-4 py-2.5 text-xs font-medium uppercase tracking-wider ${col === "Size" || col === "Status" ? "text-right" : "text-left"}`}
                 style={{ color: "var(--text-muted)" }}
               >
@@ -46,8 +51,10 @@ export default function ReportHistoryTable({ data }: Props) {
         </thead>
         <tbody>
           {data.reports.map((report) => {
-            const tc = typeColor[report.type];
-            const st = statusStyle[report.status];
+            const tc          = typeColor[report.type];
+            const st          = statusStyle[report.status];
+            const isUserReport = report.id.includes("-");
+            const isDeleting   = deletingId === report.id;
             return (
               <tr key={report.id} className="border-b" style={{ borderColor: "var(--border-subtle)" }}>
                 <td className="px-4 py-3">
@@ -75,6 +82,21 @@ export default function ReportHistoryTable({ data }: Props) {
                   >
                     {report.status}
                   </span>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  {isUserReport && (
+                    <button
+                      onClick={() => onDelete(report.id)}
+                      disabled={isDeleting}
+                      className="p-1.5 rounded transition-opacity disabled:opacity-40"
+                      style={{ color: "var(--text-muted)" }}
+                      title="Delete report"
+                    >
+                      {isDeleting
+                        ? <span className="w-3.5 h-3.5 rounded-full border-2 block animate-spin" style={{ borderColor: "var(--text-muted)", borderTopColor: "transparent" }} />
+                        : <Trash2 size={14} />}
+                    </button>
+                  )}
                 </td>
               </tr>
             );
