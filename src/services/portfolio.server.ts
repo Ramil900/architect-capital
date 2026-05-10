@@ -1,17 +1,77 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { portfolioData } from "@/constants/demo-portfolio";
-import { ASSETS } from "@/constants/assets";
+import { ASSETS, VALID_TICKERS } from "@/constants/assets";
 import { TARGET_ALLOCATION } from "@/constants/target-allocation";
 import { buildPortfolioSummary } from "@/utils/portfolio-calculations";
 import type { RawPosition, PortfolioSummaryData } from "@/types/portfolio";
 import type { AssetCategory } from "@/types/asset";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function assertRealPosition(positionId: string) {
   if (!UUID_RE.test(positionId)) {
     throw new Error("Demo data is read-only. Add your own positions to edit or delete them.");
   }
 }
+
+function classifyAssetError(err: { message?: string } | null): Error {
+  const msg = err?.message ?? "";
+  if (msg.includes("does not exist")) {
+    return new Error("Database schema not initialized. Run the SQL migration in Supabase first.");
+  }
+  if (msg.includes("Results contain 0 rows") || msg.includes("PGRST116")) {
+    return new Error("Assets table is empty. Run database seed/migration.");
+  }
+  return new Error(msg || "Unknown database error");
+}
+
+// ─── Asset lookup helpers ────────────────────────────────────────────────────
+
+interface DbAsset {
+  id:             string;
+  ticker:         string;
+  name:           string;
+  category:       string;
+  target_percent: number;
+  risk_level:     string;
+  is_active:      boolean;
+}
+
+export async function getAssetByTicker(ticker: string): Promise<DbAsset> {
+  if (!VALID_TICKERS.has(ticker)) {
+    throw new Error(`Unsupported ticker: ${ticker}. Allowed: ${[...VALID_TICKERS].join(", ")}`);
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = await createServerClient() as any;
+  const { data, error } = await supabase
+    .from("assets")
+    .select("id, ticker, name, category, target_percent, risk_level, is_active")
+    .eq("ticker", ticker)
+    .single();
+
+  if (error) throw classifyAssetError(error);
+  if (!data)  throw new Error(`Asset not found: ${ticker}`);
+  return data as DbAsset;
+}
+
+export async function getAssetById(assetId: string): Promise<DbAsset> {
+  if (!UUID_RE.test(assetId)) {
+    throw new Error(`Invalid asset ID: ${assetId}`);
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = await createServerClient() as any;
+  const { data, error } = await supabase
+    .from("assets")
+    .select("id, ticker, name, category, target_percent, risk_level, is_active")
+    .eq("id", assetId)
+    .single();
+
+  if (error) throw classifyAssetError(error);
+  if (!data)  throw new Error(`Asset not found by id: ${assetId}`);
+  return data as DbAsset;
+}
+
+// ─── Portfolio positions ─────────────────────────────────────────────────────
 
 interface DbRow {
   id:             string;
@@ -64,23 +124,10 @@ export interface AddPositionInput {
 }
 
 export async function addPortfolioPosition(userId: string, input: AddPositionInput): Promise<void> {
+  const asset = await getAssetByTicker(input.ticker);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = await createServerClient() as any;
-
-  const { data: asset, error: assetError } = await supabase
-    .from("assets")
-    .select("id, target_percent")
-    .eq("ticker", input.ticker)
-    .single();
-
-  if (assetError) {
-    const msg = assetError.message?.includes("does not exist")
-      ? "Database schema not initialized. Run the SQL migration in Supabase first."
-      : assetError.message;
-    throw new Error(msg);
-  }
-  if (!asset) throw new Error(`Asset not found: ${input.ticker}`);
-
   const { error } = await supabase
     .from("portfolio_positions")
     .insert({

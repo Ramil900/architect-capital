@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/get-session";
+import { VALID_TICKERS } from "@/constants/assets";
 import {
   getUserPortfolioPositions,
   addPortfolioPosition,
@@ -8,6 +9,10 @@ import {
   type AddPositionInput,
   type UpdatePositionInput,
 } from "@/services/portfolio.server";
+
+function validateTicker(ticker: unknown): ticker is string {
+  return typeof ticker === "string" && VALID_TICKERS.has(ticker);
+}
 
 function unauth() {
   return NextResponse.json({ success: false, data: null, error: "Unauthenticated" }, { status: 401 });
@@ -30,6 +35,18 @@ export async function POST(request: Request) {
   if (!session) return unauth();
   try {
     const body: AddPositionInput = await request.json();
+    if (!validateTicker(body.ticker)) {
+      return NextResponse.json(
+        { success: false, data: null, error: `Invalid ticker: "${body.ticker}". Use one of: ${[...VALID_TICKERS].join(", ")}` },
+        { status: 400 },
+      );
+    }
+    if (!body.quantity || body.quantity <= 0) {
+      return NextResponse.json({ success: false, data: null, error: "Quantity must be greater than 0" }, { status: 400 });
+    }
+    if (!body.averagePrice || body.averagePrice <= 0) {
+      return NextResponse.json({ success: false, data: null, error: "Average price must be greater than 0" }, { status: 400 });
+    }
     await addPortfolioPosition(session.user.id, body);
     return NextResponse.json({ success: true, data: null, error: null });
   } catch (err) {

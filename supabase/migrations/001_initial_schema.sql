@@ -17,6 +17,7 @@ create table if not exists assets (
   category       text not null check (category in ('ETF', 'Stocks', 'Crypto', 'Metals')),
   color          text not null,
   target_percent numeric(5,2) not null default 0,
+  risk_level     text not null default 'Medium' check (risk_level in ('Low', 'Medium', 'High', 'Extreme')),
   is_active      boolean not null default true,
   created_at     timestamptz not null default now(),
   updated_at     timestamptz not null default now()
@@ -260,15 +261,21 @@ create trigger trg_strategy_settings_updated_at
 -- ============================================================
 -- Seed — assets
 -- ============================================================
-insert into assets (ticker, name, category, color, target_percent) values
-  ('VOO',   'Vanguard S&P 500 ETF',      'ETF',    '#3b82f6', 20),
-  ('QQQ',   'Invesco QQQ Trust',          'ETF',    '#6366f1', 15),
-  ('SOXX',  'iShares Semiconductor ETF',  'ETF',    '#8b5cf6', 10),
-  ('SMH',   'VanEck Semiconductor ETF',   'ETF',    '#a855f7', 10),
-  ('GLD',   'SPDR Gold Trust',            'Metals', '#f59e0b', 10),
-  ('SLV',   'iShares Silver Trust',       'Metals', '#94a3b8', 10),
-  ('BTC',   'Bitcoin',                    'Crypto', '#f97316',  7),
-  ('ETH',   'Ethereum',                   'Crypto', '#06b6d4',  3),
-  ('BRK.B', 'Berkshire Hathaway B',       'Stocks', '#22c55e', 10),
-  ('TSLA',  'Tesla Inc.',                  'Stocks', '#ef4444',  5)
-on conflict (ticker) do nothing;
+insert into assets (ticker, name, category, color, target_percent, risk_level) values
+  ('VOO',   'Vanguard S&P 500 ETF',        'ETF',    '#3b82f6', 20, 'Medium'),
+  ('QQQ',   'Invesco QQQ Trust',            'ETF',    '#6366f1', 15, 'High'),
+  ('SOXX',  'iShares Semiconductor ETF',    'ETF',    '#8b5cf6', 10, 'High'),
+  ('SMH',   'VanEck Semiconductor ETF',     'ETF',    '#a855f7', 10, 'High'),
+  ('GLD',   'SPDR Gold Shares',             'Metals', '#f59e0b', 10, 'Medium'),
+  ('SLV',   'iShares Silver Trust',         'Metals', '#94a3b8', 10, 'High'),
+  ('BTC',   'Bitcoin',                      'Crypto', '#f97316',  7, 'Extreme'),
+  ('ETH',   'Ethereum',                     'Crypto', '#06b6d4',  3, 'Extreme'),
+  ('BRK.B', 'Berkshire Hathaway Class B',   'Stocks', '#22c55e', 10, 'Medium'),
+  ('TSLA',  'Tesla Inc.',                    'Stocks', '#ef4444',  5, 'Extreme')
+on conflict (ticker) do update set
+  name           = excluded.name,
+  category       = excluded.category,
+  color          = excluded.color,
+  target_percent = excluded.target_percent,
+  risk_level     = excluded.risk_level,
+  updated_at     = now();
