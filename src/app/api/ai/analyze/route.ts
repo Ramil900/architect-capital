@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/get-session";
 import { getDemoAIReport } from "@/services/ai.service";
 import { generateAIAnalysis } from "@/services/ai.server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export function GET() {
   try {
@@ -17,6 +18,11 @@ export async function POST() {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ success: false, data: null, error: "Unauthenticated" }, { status: 401 });
+  }
+
+  const rl = checkRateLimit(`ai:${session.user.id}`, 10, 10 * 60 * 1000);
+  if (!rl.allowed) {
+    return NextResponse.json({ success: false, data: null, error: "Rate limit exceeded" }, { status: 429 });
   }
 
   try {
