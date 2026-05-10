@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { LogOut, ChevronDown, User } from "lucide-react";
+import { getBrowserClient } from "@/lib/supabase/client";
 
 interface Props {
   email?: string;
@@ -10,11 +11,10 @@ interface Props {
 export default function UserMenu({ email = "user@example.com" }: Props) {
   const [open, setOpen] = useState(false);
 
-  // TODO: wire up real logout once auth is fully active.
-  // async function handleLogout() {
-  //   await getBrowserClient().auth.signOut();
-  //   window.location.href = "/login";
-  // }
+  async function handleLogout() {
+    await getBrowserClient().auth.signOut();
+    window.location.href = "/login";
+  }
 
   return (
     <div className="relative">
@@ -64,9 +64,8 @@ export default function UserMenu({ email = "user@example.com" }: Props) {
             </div>
 
             <div className="p-1">
-              {/* TODO: onClick={() => handleLogout()} */}
               <button
-                onClick={() => setOpen(false)}
+                onClick={handleLogout}
                 className="w-full flex items-center gap-2 px-2.5 py-2 rounded text-xs transition-colors"
                 style={{ color: "var(--red)" }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-hover)")}

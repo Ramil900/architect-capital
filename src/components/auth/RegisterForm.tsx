@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,10 +22,11 @@ const schema = z
 type FormValues = z.infer<typeof schema>;
 
 export default function RegisterForm() {
-  const [showPassword, setShowPassword]         = useState(false);
-  const [showConfirm,  setShowConfirm]          = useState(false);
-  const [serverError,  setServerError]          = useState<string | null>(null);
-  const [successMsg,   setSuccessMsg]           = useState<string | null>(null);
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm,  setShowConfirm]  = useState(false);
+  const [serverError,  setServerError]  = useState<string | null>(null);
+  const [successMsg,   setSuccessMsg]   = useState<string | null>(null);
 
   const {
     register,
@@ -43,6 +45,7 @@ export default function RegisterForm() {
       setServerError(error.message);
     } else {
       setSuccessMsg("Check your email to confirm your account.");
+      setTimeout(() => router.push("/login"), 3000);
     }
   }
 
