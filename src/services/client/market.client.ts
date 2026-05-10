@@ -1,8 +1,20 @@
 import { apiGet } from "@/lib/api-client";
 import type { MarketData, MarketIndicator, MarketRegime } from "@/types/market";
 
+interface IndicatorsResponse {
+  indicators:  MarketIndicator[];
+  source:      string;
+  lastUpdated: string;
+}
+
+interface PricesResponse {
+  prices:      Record<string, number>;
+  source:      string;
+  lastUpdated: string;
+}
+
 export function getMarketIndicators(): Promise<MarketIndicator[]> {
-  return apiGet<MarketIndicator[]>("/api/market/indicators");
+  return apiGet<IndicatorsResponse>("/api/market/indicators").then((r) => r.indicators);
 }
 
 export function getMarketRegime(): Promise<{ regime: MarketRegime; vix: number; riskScore: number }> {
@@ -10,14 +22,14 @@ export function getMarketRegime(): Promise<{ regime: MarketRegime; vix: number; 
 }
 
 export function getMarketPrices(): Promise<Record<string, number>> {
-  return apiGet<Record<string, number>>("/api/market/prices");
+  return apiGet<PricesResponse>("/api/market/prices").then((r) => r.prices ?? r);
 }
 
 export function getMarketData(): Promise<MarketData> {
   return Promise.all([
-    apiGet<MarketIndicator[]>("/api/market/indicators"),
+    apiGet<IndicatorsResponse>("/api/market/indicators"),
     apiGet<{ regime: MarketRegime; vix: number; riskScore: number }>("/api/market/regime"),
-  ]).then(([indicators, { regime, vix, riskScore }]) => ({
+  ]).then(([{ indicators }, { regime, vix, riskScore }]) => ({
     regime,
     vix,
     riskScore,
