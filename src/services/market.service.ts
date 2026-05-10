@@ -57,6 +57,11 @@ export async function getExternalMarketPrices(): Promise<ExternalPricesResult> {
   }
 }
 
+export async function refreshMarketData() {
+  const { syncAllMarketData } = await import("@/services/market-sync.service");
+  return syncAllMarketData();
+}
+
 export async function getExternalMarketIndicators(): Promise<ExternalIndicatorsResult> {
   const lastUpdated = new Date().toISOString();
 

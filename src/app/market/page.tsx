@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { RefreshCw } from "lucide-react";
-import { getMarketData } from "@/services/client/market.client";
-import { apiMutate } from "@/lib/api-client";
+import { getMarketData, refreshMarketData } from "@/services/client/market.client";
 import type { MarketData } from "@/types/market";
 import { PageLoading, PageError } from "@/components/ui/PageStates";
 import MarketSummary from "@/components/market/MarketSummary";
@@ -30,15 +29,15 @@ export default function MarketPage() {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
-  async function handleSync() {
+  async function handleRefresh() {
     setSyncing(true);
     setSyncMsg(null);
     try {
-      await apiMutate("POST", "/api/market/sync");
-      setSyncMsg({ ok: true, text: "Market data synced successfully." });
+      await refreshMarketData();
+      setSyncMsg({ ok: true, text: "Market data refreshed successfully." });
       load();
     } catch (e) {
-      setSyncMsg({ ok: false, text: e instanceof Error ? e.message : "Sync failed" });
+      setSyncMsg({ ok: false, text: e instanceof Error ? e.message : "Refresh failed" });
     } finally {
       setSyncing(false);
     }
@@ -54,13 +53,13 @@ export default function MarketPage() {
         <MarketSummary data={data} />
         <div className="flex flex-col items-end gap-1 shrink-0 ml-4">
           <button
-            onClick={handleSync}
+            onClick={handleRefresh}
             disabled={syncing}
             className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded border disabled:opacity-50"
             style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
           >
             <RefreshCw size={12} className={syncing ? "animate-spin" : ""} />
-            {syncing ? "Syncing…" : "Sync Market Data"}
+            {syncing ? "Refreshing…" : "Refresh Market Data"}
           </button>
           {syncMsg && (
             <p className="text-xs" style={{ color: syncMsg.ok ? "var(--green)" : "var(--red)" }}>

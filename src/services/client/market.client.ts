@@ -1,4 +1,4 @@
-import { apiGet } from "@/lib/api-client";
+import { apiGet, apiMutate } from "@/lib/api-client";
 import type { MarketData, MarketIndicator, MarketRegime } from "@/types/market";
 
 interface IndicatorsResponse {
@@ -35,4 +35,8 @@ export function getMarketData(): Promise<MarketData> {
     riskScore,
     indicators,
   }));
+}
+
+export function refreshMarketData(): Promise<void> {
+  return apiMutate("POST", "/api/market/refresh");
 }
