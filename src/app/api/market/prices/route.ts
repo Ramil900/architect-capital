@@ -10,8 +10,13 @@ export async function GET() {
     if (external.source === "external" && Object.keys(external.prices).length > 0) {
       return NextResponse.json({
         success: true,
-        data:    { prices: external.prices, source: external.source, lastUpdated: external.lastUpdated },
-        error:   null,
+        data: {
+          prices:      external.prices,
+          priceData:   external.priceData,
+          source:      external.source,
+          lastUpdated: external.lastUpdated,
+        },
+        error: null,
       });
     }
 
@@ -19,15 +24,15 @@ export async function GET() {
     if (Object.keys(supabasePrices).length > 0) {
       return NextResponse.json({
         success: true,
-        data:    { prices: supabasePrices, source: "supabase", lastUpdated },
-        error:   null,
+        data: { prices: supabasePrices, priceData: {}, source: "supabase", lastUpdated },
+        error: null,
       });
     }
 
     return NextResponse.json({
       success: true,
-      data:    { prices: {}, source: "demo", lastUpdated },
-      error:   null,
+      data: { prices: {}, priceData: {}, source: "demo", lastUpdated },
+      error: null,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
