@@ -57,9 +57,6 @@ export default function PortfolioTable({ data, onRefetch }: Props) {
       <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--border)" }}>
         <p className="text-xs font-medium uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>Positions</p>
         <div className="flex items-center gap-3">
-          {tableError && (
-            <p className="text-xs" style={{ color: "var(--red)" }}>{tableError}</p>
-          )}
           <button
             onClick={() => setAddOpen(true)}
             className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded"
@@ -69,6 +66,12 @@ export default function PortfolioTable({ data, onRefetch }: Props) {
           </button>
         </div>
       </div>
+
+      {tableError && (
+        <div className="px-5 py-2.5 border-b text-xs" style={{ color: "var(--red)", borderColor: "var(--border-subtle)", background: "color-mix(in srgb, var(--red) 6%, transparent)" }}>
+          {tableError}
+        </div>
+      )}
 
       <div className="overflow-x-auto">
         <table className="w-full min-w-[900px]">

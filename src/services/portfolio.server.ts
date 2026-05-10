@@ -6,6 +6,13 @@ import { buildPortfolioSummary } from "@/utils/portfolio-calculations";
 import type { RawPosition, PortfolioSummaryData } from "@/types/portfolio";
 import type { AssetCategory } from "@/types/asset";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function assertRealPosition(positionId: string) {
+  if (!UUID_RE.test(positionId)) {
+    throw new Error("Demo data is read-only. Add your own positions to edit or delete them.");
+  }
+}
+
 interface DbRow {
   id:             string;
   ticker:         string;
@@ -66,7 +73,13 @@ export async function addPortfolioPosition(userId: string, input: AddPositionInp
     .eq("ticker", input.ticker)
     .single();
 
-  if (assetError || !asset) throw new Error(`Asset not found: ${input.ticker}`);
+  if (assetError) {
+    const msg = assetError.message?.includes("does not exist")
+      ? "Database schema not initialized. Run the SQL migration in Supabase first."
+      : assetError.message;
+    throw new Error(msg);
+  }
+  if (!asset) throw new Error(`Asset not found: ${input.ticker}`);
 
   const { error } = await supabase
     .from("portfolio_positions")
@@ -94,6 +107,7 @@ export async function updatePortfolioPosition(
   positionId: string,
   input:      UpdatePositionInput,
 ): Promise<void> {
+  assertRealPosition(positionId);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = await createServerClient() as any;
   const { error } = await supabase
@@ -110,6 +124,7 @@ export async function updatePortfolioPosition(
 }
 
 export async function deletePortfolioPosition(userId: string, positionId: string): Promise<void> {
+  assertRealPosition(positionId);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = await createServerClient() as any;
   const { error } = await supabase
