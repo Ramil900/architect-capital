@@ -279,3 +279,53 @@ on conflict (ticker) do update set
   target_percent = excluded.target_percent,
   risk_level     = excluded.risk_level,
   updated_at     = now();
+
+-- ============================================================
+-- Unique constraints for upsert support
+-- ============================================================
+do $$ begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'market_prices_ticker_unique'
+  ) then
+    alter table market_prices add constraint market_prices_ticker_unique unique (ticker);
+  end if;
+end $$;
+
+do $$ begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'market_indicators_symbol_unique'
+  ) then
+    alter table market_indicators add constraint market_indicators_symbol_unique unique (symbol);
+  end if;
+end $$;
+
+-- ============================================================
+-- Seed — market_prices (demo fallback prices)
+-- ============================================================
+insert into market_prices (ticker, price, source) values
+  ('VOO',   512.00,   'demo'),
+  ('QQQ',   455.00,   'demo'),
+  ('SOXX',  230.00,   'demo'),
+  ('SMH',   240.00,   'demo'),
+  ('GLD',   225.00,   'demo'),
+  ('SLV',    29.00,   'demo'),
+  ('BTC',  67800.00,  'demo'),
+  ('ETH',   3600.00,  'demo'),
+  ('BRK.B', 410.00,   'demo'),
+  ('TSLA',  175.00,   'demo')
+on conflict (ticker) do nothing;
+
+-- ============================================================
+-- Seed — market_indicators (demo snapshot)
+-- ============================================================
+insert into market_indicators (symbol, name, value, display_value, daily_change, daily_change_pct, weekly_change, weekly_change_pct, status, category, interpretation) values
+  ('VIX',   'CBOE Volatility Index', 16.8,  '16.8',     -0.4,  -2.32, -1.2,  -6.67, 'Normal',  'Volatility', 'Low volatility regime. Risk appetite elevated across asset classes.'),
+  ('DXY',   'US Dollar Index',       104.2, '104.2',     0.15,  0.14, -0.8,  -0.76, 'Caution', 'Currency',   'Dollar strength pressuring commodities and emerging market assets.'),
+  ('US10Y', 'US 10-Year Treasury',   4.35,  '4.35%',     0.02,  0.46, -0.08, -1.81, 'Caution', 'Rates',      'Elevated yields signal inflation persistence. Duration risk remains.'),
+  ('SPX',   'S&P 500',              5234,   '5,234',    18.0,   0.34, 67.0,   1.30, 'Normal',  'Equity',     'Bull trend intact. Breadth improving. All-time highs within reach.'),
+  ('IXIC',  'Nasdaq Composite',    16421,   '16,421',   42.0,   0.26, 210.0,  1.30, 'Normal',  'Equity',     'Tech leadership continues. AI-driven momentum sustaining growth premium.'),
+  ('XAU',   'Gold Spot',            2348,   '$2,348',   12.0,   0.51, -18.0, -0.76, 'Normal',  'Metals',     'Gold consolidating near highs. Central bank buying supporting floor.'),
+  ('XAG',   'Silver Spot',          27.85,  '$27.85',    0.32,  1.16,  1.15,  4.31, 'Normal',  'Metals',     'Silver outperforming gold. Industrial demand from EV and solar sectors.'),
+  ('BTC',   'Bitcoin',             67800,   '$67,800', 1200.0,  1.80, 3400.0, 5.28, 'Normal',  'Crypto',     'Bitcoin near all-time highs. ETF inflows driving institutional demand.'),
+  ('ETH',   'Ethereum',             3600,   '$3,600',   85.0,   2.42, 320.0,  9.76, 'Normal',  'Crypto',     'Ethereum gaining on EIP upgrades. DeFi TVL recovering strongly.')
+on conflict (symbol) do nothing;

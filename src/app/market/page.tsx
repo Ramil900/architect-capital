@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { RefreshCw } from "lucide-react";
 import { getMarketData } from "@/services/client/market.client";
+import { apiMutate } from "@/lib/api-client";
 import type { MarketData } from "@/types/market";
 import { PageLoading, PageError } from "@/components/ui/PageStates";
 import MarketSummary from "@/components/market/MarketSummary";
@@ -11,16 +13,36 @@ import IndicatorGrid from "@/components/market/IndicatorGrid";
 import MarketInterpretation from "@/components/market/MarketInterpretation";
 
 export default function MarketPage() {
-  const [data, setData]       = useState<MarketData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState<string | null>(null);
+  const [data, setData]         = useState<MarketData | null>(null);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState<string | null>(null);
+  const [syncing, setSyncing]   = useState(false);
+  const [syncMsg, setSyncMsg]   = useState<{ ok: boolean; text: string } | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setLoading(true);
     getMarketData()
       .then(setData)
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { load(); }, [load]);
+
+  async function handleSync() {
+    setSyncing(true);
+    setSyncMsg(null);
+    try {
+      await apiMutate("POST", "/api/market/sync");
+      setSyncMsg({ ok: true, text: "Market data synced successfully." });
+      load();
+    } catch (e) {
+      setSyncMsg({ ok: false, text: e instanceof Error ? e.message : "Sync failed" });
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   if (loading) return <PageLoading />;
   if (error)   return <PageError message={error} />;
@@ -28,7 +50,25 @@ export default function MarketPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <MarketSummary data={data} />
+      <div className="flex items-center justify-between">
+        <MarketSummary data={data} />
+        <div className="flex flex-col items-end gap-1 shrink-0 ml-4">
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded border disabled:opacity-50"
+            style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+          >
+            <RefreshCw size={12} className={syncing ? "animate-spin" : ""} />
+            {syncing ? "Syncing…" : "Sync Market Data"}
+          </button>
+          {syncMsg && (
+            <p className="text-xs" style={{ color: syncMsg.ok ? "var(--green)" : "var(--red)" }}>
+              {syncMsg.text}
+            </p>
+          )}
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
