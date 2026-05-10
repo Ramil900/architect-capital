@@ -78,14 +78,18 @@ export default function PortfolioRow({ position: p, onEdit, onDelete, deleting }
         </span>
       </td>
       <td className="px-4 py-3">
-        <div className="flex items-center gap-2">
-          <button onClick={() => onEdit(p)} className="p-1 rounded" style={{ color: "var(--text-muted)" }}>
-            <Pencil size={13} />
-          </button>
-          <button onClick={() => onDelete(p.id)} disabled={deleting} className="p-1 rounded disabled:opacity-40" style={{ color: "var(--text-muted)" }}>
-            <Trash2 size={13} />
-          </button>
-        </div>
+        {!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(p.id) ? (
+          <span className="text-xs px-2 py-0.5 rounded" style={{ color: "var(--text-muted)", background: "var(--bg-hover)" }}>demo</span>
+        ) : (
+          <div className="flex items-center gap-2">
+            <button onClick={() => onEdit(p)} className="p-1 rounded" style={{ color: "var(--text-muted)" }}>
+              <Pencil size={13} />
+            </button>
+            <button onClick={() => onDelete(p.id)} disabled={deleting} className="p-1 rounded disabled:opacity-40" style={{ color: "var(--text-muted)" }}>
+              <Trash2 size={13} />
+            </button>
+          </div>
+        )}
       </td>
     </tr>
   );

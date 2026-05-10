@@ -27,11 +27,15 @@ interface Props {
   onRefetch:  () => void;
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default function PortfolioTable({ data, onRefetch }: Props) {
   const [addOpen,     setAddOpen]     = useState(false);
   const [editTarget,  setEditTarget]  = useState<PortfolioPosition | null>(null);
   const [deletingId,  setDeletingId]  = useState<string | null>(null);
   const [tableError,  setTableError]  = useState<string | null>(null);
+
+  const hasDemo = data.positions.some((p) => !UUID_RE.test(p.id));
 
   async function handleDelete(id: string) {
     setDeletingId(id);
@@ -66,6 +70,12 @@ export default function PortfolioTable({ data, onRefetch }: Props) {
           </button>
         </div>
       </div>
+
+      {hasDemo && (
+        <div className="px-5 py-2.5 border-b text-xs" style={{ color: "var(--yellow)", borderColor: "var(--border-subtle)", background: "color-mix(in srgb, var(--yellow) 6%, transparent)" }}>
+          Showing demo data — click <strong>Add Asset</strong> to add your own positions.
+        </div>
+      )}
 
       {tableError && (
         <div className="px-5 py-2.5 border-b text-xs" style={{ color: "var(--red)", borderColor: "var(--border-subtle)", background: "color-mix(in srgb, var(--red) 6%, transparent)" }}>
