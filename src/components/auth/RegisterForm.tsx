@@ -37,15 +37,19 @@ export default function RegisterForm() {
   async function onSubmit(values: FormValues) {
     setServerError(null);
     setSuccessMsg(null);
-    const { error } = await getBrowserClient().auth.signUp({
-      email:    values.email,
-      password: values.password,
-    });
-    if (error) {
-      setServerError(error.message);
-    } else {
-      setSuccessMsg("Check your email to confirm your account.");
-      setTimeout(() => router.push("/login"), 3000);
+    try {
+      const { error } = await getBrowserClient().auth.signUp({
+        email:    values.email,
+        password: values.password,
+      });
+      if (error) {
+        setServerError(error.message);
+      } else {
+        setSuccessMsg("Check your email to confirm your account.");
+        setTimeout(() => router.push("/login"), 3000);
+      }
+    } catch (e) {
+      setServerError(e instanceof Error ? e.message : "Registration failed. Check your connection.");
     }
   }
 

@@ -28,15 +28,19 @@ export default function LoginForm() {
 
   async function onSubmit(values: FormValues) {
     setServerError(null);
-    const { error } = await getBrowserClient().auth.signInWithPassword({
-      email:    values.email,
-      password: values.password,
-    });
-    if (error) {
-      setServerError(error.message);
-    } else {
-      router.push("/dashboard");
-      router.refresh();
+    try {
+      const { error } = await getBrowserClient().auth.signInWithPassword({
+        email:    values.email,
+        password: values.password,
+      });
+      if (error) {
+        setServerError(error.message);
+      } else {
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch (e) {
+      setServerError(e instanceof Error ? e.message : "Sign in failed. Check your connection.");
     }
   }
 
