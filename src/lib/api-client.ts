@@ -1,0 +1,28 @@
+interface ApiResponse<T> {
+  success: boolean;
+  data:    T | null;
+  error:   string | null;
+}
+
+export class ApiError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+export async function apiGet<T>(url: string): Promise<T> {
+  const res = await fetch(url, { cache: "no-store" });
+
+  if (!res.ok) {
+    throw new ApiError(`HTTP ${res.status}: ${res.statusText}`);
+  }
+
+  const json: ApiResponse<T> = await res.json();
+
+  if (!json.success || json.data === null) {
+    throw new ApiError(json.error ?? "Unknown API error");
+  }
+
+  return json.data;
+}
