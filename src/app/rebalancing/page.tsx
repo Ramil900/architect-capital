@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { BookmarkCheck } from "lucide-react";
 import { getRebalancePlan, saveRebalanceAction } from "@/services/client/rebalance.client";
 import type { RebalanceSummaryData } from "@/types/rebalancing";
@@ -20,12 +20,21 @@ export default function RebalancingPage() {
   const [saved,   setSaved]   = useState(false);
   const [saveErr, setSaveErr] = useState<string | null>(null);
 
-  useEffect(() => {
-    getRebalancePlan()
-      .then(setData)
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setLoading(false));
+  const load = useCallback(async (showSpinner = true) => {
+    if (showSpinner) setLoading(true);
+    try {
+      const d = await getRebalancePlan();
+      setData(d);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load rebalance plan");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { load(); }, [load]);
 
   async function handleSaveAction() {
     if (!data) return;
@@ -48,6 +57,7 @@ export default function RebalancingPage() {
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+      load(false);
     } catch (e) {
       setSaveErr(e instanceof Error ? e.message : "Failed to record action");
     } finally {
