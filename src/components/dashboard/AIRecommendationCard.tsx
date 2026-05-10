@@ -1,6 +1,11 @@
 import { BrainCircuit } from "lucide-react";
-import { getPortfolioPositions } from "@/services/portfolio.service";
-import { getDemoAIReport } from "@/services/ai.service";
+import type { AIRecommendation, DCAStatus } from "@/types/ai";
+
+interface Props {
+  recommendations: AIRecommendation[];
+  finalSummary:    string;
+  dcaStatus:       DCAStatus;
+}
 
 const actionColors: Record<string, string> = {
   Buy:    "var(--green)",
@@ -23,13 +28,10 @@ function TagGroup({ label, items, color }: { label: string; items: string[]; col
   );
 }
 
-export default function AIRecommendationCard() {
-  const positions  = getPortfolioPositions();
-  const { finalSummary, dcaStatus } = getDemoAIReport();
-
-  const buy    = positions.filter((p) => p.aiAction === "Buy").map((p) => p.ticker);
-  const hold   = positions.filter((p) => p.aiAction === "Hold").map((p) => p.ticker);
-  const reduce = positions.filter((p) => p.aiAction === "Reduce").map((p) => p.ticker);
+export default function AIRecommendationCard({ recommendations, finalSummary, dcaStatus }: Props) {
+  const buy    = recommendations.filter((r) => r.action === "Buy").map((r) => r.ticker);
+  const hold   = recommendations.filter((r) => r.action === "Hold").map((r) => r.ticker);
+  const reduce = recommendations.filter((r) => r.action === "Reduce" || r.action === "Sell").map((r) => r.ticker);
 
   return (
     <div className="rounded-lg p-5 border" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>

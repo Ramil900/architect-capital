@@ -1,7 +1,11 @@
 import { TrendingUp, TrendingDown } from "lucide-react";
-import { getMarketIndicators } from "@/services/market.service";
+import type { MarketIndicator } from "@/types/market";
 
-const OVERVIEW_IDS = ["vix", "dxy", "us10y", "sp500", "nasdaq", "btc", "gold"] as const;
+interface Props {
+  indicators: MarketIndicator[];
+}
+
+const OVERVIEW_SYMBOLS = ["VIX", "DXY", "US10Y", "SPX", "IXIC", "BTC", "XAU"];
 
 const statusColor: Record<string, string> = {
   Normal:  "var(--green)",
@@ -9,9 +13,10 @@ const statusColor: Record<string, string> = {
   Danger:  "var(--red)",
 };
 
-export default function MarketOverviewGrid() {
-  const allIndicators = getMarketIndicators();
-  const indicators    = OVERVIEW_IDS.map((id) => allIndicators.find((i) => i.id === id)!);
+export default function MarketOverviewGrid({ indicators }: Props) {
+  const visible = OVERVIEW_SYMBOLS
+    .map((sym) => indicators.find((i) => i.symbol === sym))
+    .filter((i): i is MarketIndicator => i !== undefined);
 
   return (
     <div className="rounded-lg p-5 border" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
@@ -20,10 +25,10 @@ export default function MarketOverviewGrid() {
       </p>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-        {indicators.map((ind) => {
+        {visible.map((ind) => {
           const positive = ind.dailyChangePct >= 0;
           return (
-            <div key={ind.id} className="rounded p-3 border" style={{ background: "var(--bg-hover)", borderColor: "var(--border-subtle)" }}>
+            <div key={ind.symbol} className="rounded p-3 border" style={{ background: "var(--bg-hover)", borderColor: "var(--border-subtle)" }}>
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>{ind.symbol}</span>
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: statusColor[ind.status] }} />

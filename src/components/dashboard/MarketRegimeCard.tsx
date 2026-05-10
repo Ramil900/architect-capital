@@ -1,9 +1,14 @@
 import { Activity } from "lucide-react";
-import { getMarketData } from "@/services/market.service";
 import { REGIME_CONFIG } from "@/constants/risk-levels";
+import type { MarketRegime } from "@/types/market";
 
-export default function MarketRegimeCard() {
-  const { regime, vix, riskScore } = getMarketData();
+interface Props {
+  regime:    MarketRegime;
+  vix:       number;
+  riskScore: number;
+}
+
+export default function MarketRegimeCard({ regime, vix, riskScore }: Props) {
   const config = REGIME_CONFIG[regime];
 
   return (
