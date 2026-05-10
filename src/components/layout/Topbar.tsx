@@ -1,20 +1,25 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { Menu } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 
 const pageTitles: Record<string, string> = {
-  "/dashboard": "Dashboard",
-  "/portfolio": "Portfolio",
+  "/dashboard":   "Dashboard",
+  "/portfolio":   "Portfolio",
   "/ai-strategy": "AI Strategy",
-  "/market": "Market Indicators",
-  "/dca": "DCA Planner",
+  "/market":      "Market Indicators",
+  "/dca":         "DCA Planner",
   "/rebalancing": "Rebalancing",
-  "/reports": "Reports",
-  "/settings": "Settings",
+  "/reports":     "Reports",
+  "/settings":    "Settings",
 };
 
-export default function Topbar() {
+interface Props {
+  onMenuClick?: () => void;
+}
+
+export default function Topbar({ onMenuClick }: Props) {
   const pathname = usePathname();
 
   const title =
@@ -24,31 +29,42 @@ export default function Topbar() {
 
   const now = new Date().toLocaleDateString("en-US", {
     weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+    month:   "short",
+    day:     "numeric",
+    year:    "numeric",
   });
 
   return (
     <header
-      className="flex items-center justify-between px-6 py-3 border-b shrink-0"
+      className="flex items-center justify-between px-4 md:px-6 py-3 border-b shrink-0"
       style={{
-        background: "var(--bg-secondary)",
+        background:  "var(--bg-secondary)",
         borderColor: "var(--border)",
-        height: "52px",
+        height:      "52px",
       }}
     >
-      {/* Title */}
-      <h1
-        className="text-sm font-semibold tracking-wide"
-        style={{ color: "var(--text-primary)" }}
-      >
-        {title}
-      </h1>
+      {/* Left: hamburger (mobile) + title */}
+      <div className="flex items-center gap-3 min-w-0">
+        <button
+          onClick={onMenuClick}
+          className="md:hidden w-8 h-8 rounded flex items-center justify-center shrink-0 transition-opacity hover:opacity-70"
+          style={{ color: "var(--text-secondary)" }}
+          aria-label="Toggle menu"
+        >
+          <Menu size={18} strokeWidth={1.5} />
+        </button>
 
-      {/* Right side */}
-      <div className="flex items-center gap-4">
-        <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+        <h1
+          className="text-sm font-semibold tracking-wide truncate"
+          style={{ color: "var(--text-primary)" }}
+        >
+          {title}
+        </h1>
+      </div>
+
+      {/* Right: date (desktop only) + bell + avatar */}
+      <div className="flex items-center gap-3 md:gap-4 shrink-0">
+        <span className="hidden md:block text-xs" style={{ color: "var(--text-muted)" }}>
           {now}
         </span>
 
