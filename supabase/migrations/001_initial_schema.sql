@@ -111,23 +111,18 @@ create index if not exists idx_strategy_settings_user_id on strategy_settings (u
 
 -- ============================================================
 -- ai_reports
--- Per-user AI analysis snapshots
+-- Per-user generated report history
 -- ============================================================
 create table if not exists ai_reports (
-  id               uuid primary key default uuid_generate_v4(),
-  user_id          uuid not null references auth.users (id) on delete cascade,
-  market_regime    text not null,
-  portfolio_risk   text not null,
-  risk_score       integer not null,
-  confidence       integer not null,
-  final_summary    text not null,
-  recommendations  jsonb not null default '[]',
-  risk_factors     jsonb not null default '[]',
-  dca_status       text not null,
-  dca_amount       numeric(12,2),
-  dca_frequency    text,
-  dca_allocation   jsonb not null default '[]',
-  created_at       timestamptz not null default now()
+  id           uuid primary key default uuid_generate_v4(),
+  user_id      uuid not null references auth.users (id) on delete cascade,
+  type         text not null,
+  title        text not null,
+  description  text not null default '',
+  status       text not null default 'Generated',
+  size         text,
+  generated_at timestamptz not null default now(),
+  created_at   timestamptz not null default now()
 );
 
 create index if not exists idx_ai_reports_user_id    on ai_reports (user_id);
@@ -184,14 +179,14 @@ create table if not exists notifications (
   user_id    uuid not null references auth.users (id) on delete cascade,
   type       text not null,
   title      text not null,
-  body       text not null,
-  is_read    boolean not null default false,
+  message    text not null,
+  read       boolean not null default false,
   created_at timestamptz not null default now()
 );
 
 create index if not exists idx_notifications_user_id    on notifications (user_id);
 create index if not exists idx_notifications_created_at on notifications (created_at desc);
-create index if not exists idx_notifications_is_read    on notifications (user_id, is_read);
+create index if not exists idx_notifications_read       on notifications (user_id, read);
 
 -- ============================================================
 -- Row Level Security
