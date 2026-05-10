@@ -9,6 +9,7 @@ export default function AIChatWindow() {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput]       = useState("");
   const bottomRef               = useRef<HTMLDivElement>(null);
+  const msgIdRef                = useRef(0);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -17,13 +18,13 @@ export default function AIChatWindow() {
   function sendMessage(text: string) {
     if (!text.trim()) return;
 
-    const userMsg: ChatMessage = { id: Date.now().toString(), role: "user", content: text };
+    const userMsg: ChatMessage = { id: String(++msgIdRef.current), role: "user", content: text };
 
     const matched = quickQuestions.find((q) => q.label === text);
     const aiContent = matched?.answer ??
       "Анализирую данные... На данный момент у меня нет конкретного ответа на этот вопрос. Попробуйте один из предложенных вопросов.";
 
-    const aiMsg: ChatMessage = { id: (Date.now() + 1).toString(), role: "ai", content: aiContent };
+    const aiMsg: ChatMessage = { id: String(++msgIdRef.current), role: "ai", content: aiContent };
 
     setMessages((prev) => [...prev, userMsg, aiMsg]);
     setInput("");

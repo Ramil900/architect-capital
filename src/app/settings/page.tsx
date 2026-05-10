@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Save } from "lucide-react";
 import { defaultSettings } from "@/constants/settingsData";
 import { getSettings, saveSettings } from "@/services/client/settings.client";
-import { PageLoading, PageError } from "@/components/ui/PageStates";
+import { PageLoading } from "@/components/ui/PageStates";
 import type { AppSettings } from "@/types/settings";
 import StrategySettingsCard     from "@/components/settings/StrategySettingsCard";
 import RiskSettingsCard         from "@/components/settings/RiskSettingsCard";
