@@ -4,7 +4,17 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { Download, FileText, Table, FileSpreadsheet } from "lucide-react";
 import type { ExportFormat } from "@/types/reports";
+import type { ReportSummaryData } from "@/types/reports";
+import type { PortfolioSummaryData } from "@/types/portfolio";
+import type { AIAnalysisData } from "@/types/ai";
 import { exportReport } from "@/services/client/reports.client";
+
+interface Props {
+  summary?:   ReportSummaryData;
+  portfolio?: PortfolioSummaryData;
+  regime?:    { regime: string; vix: number; riskScore: number };
+  ai?:        AIAnalysisData;
+}
 
 const formats: { format: ExportFormat; icon: ReactNode; color: string; desc: string }[] = [
   { format: "PDF",   icon: <FileText size={16} />,        color: "#ef4444", desc: "Full report with charts" },
@@ -12,7 +22,7 @@ const formats: { format: ExportFormat; icon: ReactNode; color: string; desc: str
   { format: "Excel", icon: <FileSpreadsheet size={16} />, color: "#3b82f6", desc: "Multi-sheet workbook" },
 ];
 
-export default function ExportCenter() {
+export default function ExportCenter({ summary, portfolio, regime, ai }: Props) {
   const [exporting, setExporting] = useState<ExportFormat | null>(null);
   const [error,     setError]     = useState<string | null>(null);
 
@@ -20,7 +30,12 @@ export default function ExportCenter() {
     setExporting(format);
     setError(null);
     try {
-      await exportReport("r1", format);
+      if (format === "PDF") {
+        const { generateReportPdf } = await import("@/lib/pdf/generate-report-pdf");
+        generateReportPdf({ summary, portfolio, regime, ai });
+      } else {
+        await exportReport("r1", format);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Export failed");
     } finally {

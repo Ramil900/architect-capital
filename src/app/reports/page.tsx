@@ -143,7 +143,7 @@ export default function ReportsPage() {
         <div className="lg:col-span-2">
           <AIReportSummary data={data} />
         </div>
-        <ExportCenter />
+        <ExportCenter summary={data} portfolio={portfolio} regime={regime} ai={ai} />
       </div>
 
       <ReportHistoryTable data={data} onDelete={handleDelete} deletingId={deletingId} />
