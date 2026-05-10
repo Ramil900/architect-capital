@@ -8,29 +8,42 @@ export async function proxy(request: NextRequest) {
 
   let response = NextResponse.next({ request });
 
-  const supabase = createServerClient(env.supabaseUrl, env.supabaseAnon, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
-        cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options)
-        );
-      },
-    },
-  });
-
-  const { data: { session } } = await supabase.auth.getSession();
-
-  if (isProtectedRoute(pathname) && !session) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  if (!env.supabaseUrl || !env.supabaseAnon) {
+    if (isProtectedRoute(pathname)) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+    return response;
   }
 
-  if (isPublicRoute(pathname) && session) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  try {
+    const supabase = createServerClient(env.supabaseUrl, env.supabaseAnon, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    });
+
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (isProtectedRoute(pathname) && !session) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    if (isPublicRoute(pathname) && session) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  } catch {
+    if (isProtectedRoute(pathname)) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
   }
 
   return response;
