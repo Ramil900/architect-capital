@@ -33,6 +33,12 @@ export default function ExportCenter({ summary, portfolio, regime, ai }: Props) 
       if (format === "PDF") {
         const { generateReportPdf } = await import("@/lib/pdf/generate-report-pdf");
         generateReportPdf({ summary, portfolio, regime, ai });
+      } else if (format === "CSV") {
+        const { generateReportCsv } = await import("@/lib/export/generate-csv");
+        generateReportCsv({ summary, portfolio, regime, ai });
+      } else if (format === "Excel") {
+        const { generateReportExcel } = await import("@/lib/export/generate-excel");
+        await generateReportExcel({ summary, portfolio, regime, ai });
       } else {
         await exportReport("r1", format);
       }
