@@ -22,6 +22,7 @@ const rawPositions: RawPosition[] = ASSETS.map((a) => ({
   name:          a.name,
   category:      a.category,
   targetPercent: TARGET_ALLOCATION[a.ticker],
+  priceSource:   "demo" as const,
   ...POSITION_PRICES[a.ticker],
 }));
 

@@ -1,5 +1,6 @@
 export type { AssetCategory } from "@/types/asset";
-export type AIAction = "Buy" | "Hold" | "Reduce" | "Sell";
+export type AIAction    = "Buy" | "Hold" | "Reduce" | "Sell";
+export type PriceSource = "market" | "stored" | "demo";
 
 import type { AssetCategory } from "@/types/asset";
 
@@ -12,6 +13,7 @@ export interface RawPosition {
   averagePrice:  number;
   currentPrice:  number;
   targetPercent: number;
+  priceSource:   PriceSource;
 }
 
 export interface PortfolioPosition extends RawPosition {

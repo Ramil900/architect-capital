@@ -17,7 +17,7 @@ export interface ExternalIndicatorsResult {
   lastUpdated: string;
 }
 
-const PRICE_TICKERS   = ["VOO", "BRK.B", "AAPL", "MSFT", "GOOGL", "AMZN", "JPM", "GLD"];
+const PRICE_TICKERS = ["VOO", "QQQ", "SOXX", "SMH", "GLD", "SLV", "BTC", "ETH", "BRK.B", "TSLA"];
 const INDICATOR_SYMBOLS = ["^VIX", "^GSPC", "^TNX", "DX-Y.NYB"];
 
 export function getMarketIndicators(): MarketIndicator[] {
@@ -77,3 +77,4 @@ export async function getExternalMarketIndicators(): Promise<ExternalIndicatorsR
     return { indicators: marketData.indicators, source: "demo", lastUpdated };
   }
 }
+

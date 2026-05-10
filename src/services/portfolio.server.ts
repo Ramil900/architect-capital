@@ -3,8 +3,42 @@ import { portfolioData } from "@/constants/demo-portfolio";
 import { ASSETS, VALID_TICKERS } from "@/constants/assets";
 import { TARGET_ALLOCATION } from "@/constants/target-allocation";
 import { buildPortfolioSummary } from "@/utils/portfolio-calculations";
-import type { RawPosition, PortfolioSummaryData } from "@/types/portfolio";
+import type { RawPosition, PortfolioSummaryData, PriceSource } from "@/types/portfolio";
 import type { AssetCategory } from "@/types/asset";
+
+interface DbMarketPrice { ticker: string; price: string | number; recorded_at: string }
+
+async function fetchMarketPrices(tickers: string[]): Promise<Record<string, number>> {
+  if (tickers.length === 0) return {};
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = await createServerClient() as any;
+    const { data, error } = await supabase
+      .from("market_prices")
+      .select("ticker, price, recorded_at")
+      .in("ticker", tickers)
+      .order("recorded_at", { ascending: false });
+
+    if (error || !data) return {};
+    const prices: Record<string, number> = {};
+    for (const row of data as DbMarketPrice[]) {
+      if (!(row.ticker in prices)) prices[row.ticker] = Number(row.price);
+    }
+    return prices;
+  } catch {
+    return {};
+  }
+}
+
+export async function getPriceByTicker(
+  ticker: string,
+  fallback = 0,
+): Promise<{ price: number; source: "market" | "stored" }> {
+  const prices = await fetchMarketPrices([ticker]);
+  return prices[ticker] !== undefined
+    ? { price: prices[ticker], source: "market" }
+    : { price: fallback, source: "stored" };
+}
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -83,8 +117,12 @@ interface DbRow {
   assets: { name: string; category: string } | null;
 }
 
-function rowToRaw(row: DbRow): RawPosition {
-  const asset = ASSETS.find((a) => a.ticker === row.ticker);
+function rowToRaw(row: DbRow, marketPrice?: number): RawPosition {
+  const asset        = ASSETS.find((a) => a.ticker === row.ticker);
+  const storedPrice  = Number(row.current_price) || 0;
+  const currentPrice = marketPrice ?? storedPrice;
+  const priceSource: PriceSource = marketPrice !== undefined ? "market" : storedPrice > 0 ? "stored" : "demo";
+
   return {
     id:            row.id,
     ticker:        row.ticker,
@@ -92,8 +130,9 @@ function rowToRaw(row: DbRow): RawPosition {
     category:      (row.assets?.category ?? asset?.category ?? "ETF") as AssetCategory,
     quantity:      Number(row.quantity),
     averagePrice:  Number(row.average_price),
-    currentPrice:  Number(row.current_price) || 0,
+    currentPrice,
     targetPercent: Number(row.target_percent) || TARGET_ALLOCATION[row.ticker] || 0,
+    priceSource,
   };
 }
 
@@ -109,7 +148,11 @@ export async function getUserPortfolioPositions(userId: string): Promise<Portfol
 
     if (error || !data || (data as DbRow[]).length === 0) return portfolioData;
 
-    const raw = (data as DbRow[]).map(rowToRaw);
+    const rows    = data as DbRow[];
+    const tickers = rows.map((r) => r.ticker);
+    const marketPrices = await fetchMarketPrices(tickers);
+
+    const raw = rows.map((row) => rowToRaw(row, marketPrices[row.ticker]));
     return buildPortfolioSummary(raw);
   } catch {
     return portfolioData;
