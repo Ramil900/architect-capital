@@ -174,10 +174,12 @@ npm run lint     # ESLint
 
 ## Deployment (Vercel)
 
+### Steps
+
 1. Push repo to GitHub
 2. Import in [Vercel dashboard](https://vercel.com/new)
 3. Add environment variables under **Settings → Environment Variables**
-4. Deploy — Vercel auto-detects Next.js, no `vercel.json` needed
+4. Click **Deploy** — Vercel auto-detects Next.js
 
 ### Minimum Required Variables on Vercel
 
@@ -186,23 +188,36 @@ NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 ```
 
-### Supabase Auth Callback URL
+### Supabase Setup
 
-In **Supabase → Authentication → URL Configuration**, add:
+In **Supabase → Authentication → URL Configuration**, add your Vercel URL:
 
 ```
 https://your-app.vercel.app/**
 ```
 
-### Automatic Market Refresh (Vercel Cron)
+Create all tables from the **Supabase Schema** section below and enable RLS.
 
-`vercel.json` schedules `/api/cron/market-refresh` every 15 minutes automatically on Vercel Pro/Enterprise. Add `CRON_SECRET` to your environment variables — Vercel passes it via the `Authorization` header.
+### Cron Setup
 
-To trigger manually:
+`vercel.json` schedules `/api/cron/market-refresh` every 15 minutes on Vercel Pro/Enterprise. Add `CRON_SECRET` in Vercel environment variables.
+
+To test manually:
 
 ```bash
 curl "https://your-app.vercel.app/api/cron/market-refresh?secret=YOUR_CRON_SECRET"
 ```
+
+### Production Checklist
+
+- [ ] `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` set
+- [ ] Supabase tables created and RLS enabled
+- [ ] Supabase Auth redirect URL added (`https://your-app.vercel.app/**`)
+- [ ] `OPENAI_API_KEY` set (optional — falls back to demo)
+- [ ] `TWELVEDATA_API_KEY` / `COINGECKO_API_KEY` set (optional — real market prices)
+- [ ] `CRON_SECRET` set (optional — enables scheduled market refresh)
+- [ ] `NEXT_PUBLIC_APP_URL` set to production URL
+- [ ] `npm run build` passes locally before deploying
 
 ### Manual Market Sync (optional)
 
