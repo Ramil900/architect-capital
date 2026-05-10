@@ -11,11 +11,21 @@ export class ApiError extends Error {
   }
 }
 
+async function readError(res: Response, fallback: string): Promise<string> {
+  try {
+    const json: ApiResponse<unknown> = await res.json();
+    return json.error ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export async function apiGet<T>(url: string): Promise<T> {
   const res = await fetch(url, { cache: "no-store" });
 
   if (!res.ok) {
-    throw new ApiError(`HTTP ${res.status}: ${res.statusText}`);
+    const msg = await readError(res, `Request failed (${res.status})`);
+    throw new ApiError(msg);
   }
 
   const json: ApiResponse<T> = await res.json();
@@ -35,7 +45,8 @@ export async function apiPost<T>(url: string, body: unknown): Promise<T> {
   });
 
   if (!res.ok) {
-    throw new ApiError(`HTTP ${res.status}: ${res.statusText}`);
+    const msg = await readError(res, `Request failed (${res.status})`);
+    throw new ApiError(msg);
   }
 
   const json: ApiResponse<T> = await res.json();
@@ -55,7 +66,8 @@ export async function apiMutate(method: string, url: string, body?: unknown): Pr
   });
 
   if (!res.ok) {
-    throw new ApiError(`HTTP ${res.status}: ${res.statusText}`);
+    const msg = await readError(res, `Request failed (${res.status})`);
+    throw new ApiError(msg);
   }
 
   const json: ApiResponse<unknown> = await res.json();
