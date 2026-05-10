@@ -1,6 +1,7 @@
-import type { AIAction, PortfolioPosition, PortfolioSummaryData, RawPosition } from "@/types/portfolio";
+import type { PortfolioSummaryData, RawPosition } from "@/types/portfolio";
 import { ASSETS } from "@/constants/assets";
 import { TARGET_ALLOCATION } from "@/constants/target-allocation";
+import { buildPortfolioSummary } from "@/utils/portfolio-calculations";
 
 const POSITION_PRICES: Record<string, { quantity: number; averagePrice: number; currentPrice: number }> = {
   "VOO":   { quantity: 50,    averagePrice: 480,   currentPrice: 512   },
@@ -15,12 +16,6 @@ const POSITION_PRICES: Record<string, { quantity: number; averagePrice: number; 
   "TSLA":  { quantity: 45,    averagePrice: 200,   currentPrice: 175   },
 };
 
-function getAIAction(diff: number): AIAction {
-  if (diff > 2)  return "Buy";
-  if (diff < -2) return "Reduce";
-  return "Hold";
-}
-
 const rawPositions: RawPosition[] = ASSETS.map((a) => ({
   id:            a.id,
   ticker:        a.ticker,
@@ -30,25 +25,4 @@ const rawPositions: RawPosition[] = ASSETS.map((a) => ({
   ...POSITION_PRICES[a.ticker],
 }));
 
-function buildPortfolio(raw: RawPosition[]): PortfolioSummaryData {
-  const totalValue = raw.reduce((sum, p) => sum + p.quantity * p.currentPrice, 0);
-
-  const positions: PortfolioPosition[] = raw.map((p) => {
-    const positionValue       = p.quantity * p.currentPrice;
-    const investedAmount      = p.quantity * p.averagePrice;
-    const unrealizedPL        = positionValue - investedAmount;
-    const unrealizedPLPercent = (unrealizedPL / investedAmount) * 100;
-    const currentPercent      = (positionValue / totalValue) * 100;
-    const differencePercent   = p.targetPercent - currentPercent;
-    const aiAction            = getAIAction(differencePercent);
-    return { ...p, positionValue, investedAmount, unrealizedPL, unrealizedPLPercent, currentPercent, differencePercent, aiAction };
-  });
-
-  const totalInvested  = positions.reduce((s, p) => s + p.investedAmount, 0);
-  const totalPL        = totalValue - totalInvested;
-  const totalPLPercent = (totalPL / totalInvested) * 100;
-
-  return { totalValue, totalInvested, totalPL, totalPLPercent, positions };
-}
-
-export const portfolioData: PortfolioSummaryData = buildPortfolio(rawPositions);
+export const portfolioData: PortfolioSummaryData = buildPortfolioSummary(rawPositions);

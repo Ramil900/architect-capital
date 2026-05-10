@@ -1,5 +1,5 @@
 import type { MarketData, MarketIndicator } from "@/types/market";
-import { getMarketRegime } from "@/constants/risk-levels";
+import { getMarketRegimeFromVix, calculateRiskScore } from "@/utils/risk-calculations";
 
 const rawIndicators: MarketIndicator[] = [
   {
@@ -130,15 +130,11 @@ const rawIndicators: MarketIndicator[] = [
   },
 ];
 
-const vix       = rawIndicators.find((i) => i.id === "vix")!.value;
-const regime    = getMarketRegime(vix);
-const caution   = rawIndicators.filter((i) => i.status === "Caution").length;
-const danger    = rawIndicators.filter((i) => i.status === "Danger").length;
-const riskScore = Math.round(((caution * 3 + danger * 7) / (rawIndicators.length * 7)) * 100);
+const vix = rawIndicators.find((i) => i.id === "vix")!.value;
 
 export const marketData: MarketData = {
-  regime,
-  riskScore,
+  regime:    getMarketRegimeFromVix(vix),
+  riskScore: calculateRiskScore(rawIndicators),
   vix,
   indicators: rawIndicators,
 };
