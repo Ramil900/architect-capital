@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Bell } from "lucide-react";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -52,12 +52,7 @@ export default function Topbar() {
           {now}
         </span>
 
-        <button
-          className="w-8 h-8 rounded flex items-center justify-center transition-colors"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          <Bell size={15} strokeWidth={1.5} />
-        </button>
+        <NotificationBell />
 
         <div
           className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold"
